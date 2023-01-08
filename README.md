@@ -379,3 +379,96 @@ function countUser(user) {
 객체엔 '주요' 자료를, 워크맵과 워크셋엔 '부수적인' 자료를 저장하는 형태로 워크맵과 워크셋을 활용할 수 있다. 객체가 메모리에서 삭제되면, (그리고 오로지 워크맵과 워크셋의 키만 해당 객체를 참조하고 있다면) 워크맵이나 워크셋에 저장된 연관 자료들 역시 메모리에서 자동으로 삭제된다. 
 
 
+# iterable 객체
+> 반복 가능한 (iterable, 이터러블)객체는 배열을 일반화한 객체이다. 
+  이터러블이라는 개념을 사용하면 어떤 객체에든 for..of 반복문을 적용할 수 있다.
+
+> 배열은 대표적인 이터러블인데 배열이 아닌 객체도 이 객체가 어떤 것들의 컬렉션(목록, 집합 등 나타내고 있는 경우, for...of 문법을 적용할 수 있다면 컬렉션을 순회하는데 유용할 것이다.
+
+ex) range을 만들어서 이터러블하게 만들어 for..of가 동작하도록 하자. 
+```tsx
+let range = {
+  from: 1,
+  to: 5
+};
+
+// 1. for..of 최초 호출 시, Symbol.iterator가 호출됩니다.
+range[Symbol.iterator] = function() {
+
+  // Symbol.iterator는 이터레이터 객체를 반환합니다.
+  // 2. 이후 for..of는 반환된 이터레이터 객체만을 대상으로 동작하는데, 이때 다음 값도 정해집니다.
+  return {
+    current: this.from,
+    last: this.to,
+
+    // 3. for..of 반복문에 의해 반복마다 next()가 호출됩니다.
+    next() {
+      // 4. next()는 값을 객체 {done:.., value :...}형태로 반환해야 합니다.
+      if (this.current <= this.last) {
+        return { done: false, value: this.current++ };
+      } else {
+        return { done: true };
+      }
+    }
+  };
+};
+
+// 이제 의도한 대로 동작합니다!
+for (let num of range) {
+  alert(num); // 1, then 2, 3, 4, 5
+}
+```
+- range엔 메서드 next()가 없다.
+- 대신 range[Symbol.iterator]()를 호출해서 만든 '이터레이터' 객체와 이 객체의 메서드 next()에서 반복에 사용될 값을 만들어 낸다. 
+- 여기서 range 자체를 이터레이터로 만들면 코드가 더 간단해진다.
+```tsx
+let range = {
+  from: 1,
+  to: 5,
+
+  [Symbol.iterator]() {
+    this.current = this.from;
+    return this;
+  },
+
+  next() {
+    if (this.current <= this.to) {
+      return { done: false, value: this.current++ };
+    } else {
+      return { done: true };
+    }
+  }
+};
+
+for (let num of range) {
+  alert(num); // 1, then 2, 3, 4, 5
+}
+```
+
+### 문자열도 이터러블이다.
+
+```tsx
+let str = '𝒳😂';
+for (let char of str) {
+    alert( char ); // 𝒳와 😂가 차례대로 출력됨
+}
+```
+
+### 이터러블과 유사 배열
+> 비슷해 보이지만 아주 다른 용어 두 가지가 있다.
+- 이터러블(iterable)은 위에서 설명한 바와 같이 메서드 Symbol.iterator가 구현된 객체이다.
+- 유사 배열(array-like)은 인덱스와 length 프로퍼티가 있어서 배열처럼 보이는 객체이다. 
+> 물론 보통 이터러블 객체(for..of를 사용할 수 있음)면서 유사배열 객체(숫자 인덱스와 length 프로퍼티가 있음)인 문자열 같은 것들도 많다. 
+> 다만 이터러블 객체라고 해서 유사 배열 객체는 아니고, 유사 배열 객체라고 해서 이터러블 객체인 것도 아니다. 
+
+### Array
+> Array.form을 사용해서 배열을 생성하면 이터러블 객체여서 for..of를 쓸 수 있다. 
+
+### iterable 요약
+- for..of를 사용할 수 있는 객체를 이터러블이라고 부른다.
+  1. 이터러블엔 메서드 Symbol.iterator가 반드시 구현되어 있어야 한다.
+  2. 이터레이터엔 객체 {done: Boolean, value: any}을 반환하는 메서드 next()가 반드시 구현되어 있어야 한다.
+  3. 문자열이나 배열 같은 내장 이터러블에도 Symbol.iterator가 구현되어 있다. 
+
+- 인덱스와 length 프로퍼티가 있는 객체는 유사 배열이라 부른다. 유사 배열 객체엔 다양한 프로퍼티와 메서드가 있을 수 있는 배열 내장 메서드는 없다. 
+- Array.from(obj[, mapFn, thisArg])을 사용하면 이터러블이나 유사 배열인 obj를 진짜 Array로 만들 수 있다. 이렇게 하면 obj에도 배열 메서드를 사용할 수 있다. 선택 인수 mapFn와 thisArg는 각 요소에 함수를 적용할 수 있게 해준다.
