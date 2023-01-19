@@ -735,10 +735,12 @@ new Function('a , b', 'return a + b'); // 쉼표와 공백으로 구분
 ```
 
 # 마이크로태스크
-> 프라미스 핸들러 <code>.them/catch/finally</code>는 항상 비동적으로 실행된다. 
-  프라미스가 즉시 이행되더라도 <code>.then/catch/finally</code> 아래에 있는 코드는 이 핸들러들이 실행되기 전에 실행된다. 
 
-ex) 
+> 프라미스 핸들러 <code>.them/catch/finally</code>는 항상 비동적으로 실행된다.
+> 프라미스가 즉시 이행되더라도 <code>.then/catch/finally</code> 아래에 있는 코드는 이 핸들러들이 실행되기 전에 실행된다.
+
+ex)
+
 ```
 let promise = Promise.resolve();
 
@@ -746,16 +748,61 @@ promise.then(() => alert("프라미스 성공!"));
 
 alert("코드 종료"); // 얼럿 창이 가장 먼저 뜸.
 ```
-위의 코드는 '코드 종료'가 먼저, '프라미스 성공!'이 나중에 출력된다. 프라미스는 즉시 이행상태가 됐는데도 말이다. 
+
+위의 코드는 '코드 종료'가 먼저, '프라미스 성공!'이 나중에 출력된다. 프라미스는 즉시 이행상태가 됐는데도 말이다.
 
 ### 왜 .then이 나중에 트리거 될까?
+
 > 비동기 작업을 처리하려면 적절한 관리가 필요하다. 이를 위해 ECMA에선 PrommiseJobs라는 내부 큐(internal queue)를 명시한다. v8에선 이를 '마이크로태스크 큐'라고 부른다.
+
 - 마이크로태스크 큐는 먼저 들어온 작업을 먼저 실행한다. (FIFO)
-- 실행할 것이 아무것도 남아있지 않을 때만 마이크로태스크 큐에 있는 작업이 실행되기 시작한다. 
+- 실행할 것이 아무것도 남아있지 않을 때만 마이크로태스크 큐에 있는 작업이 실행되기 시작한다.
 
-> 요약하자면, 어떤 프라미스가 준비되었을 때 이 프라미스의 <code>.then/catch/finally</code> 핸들러가 큐에 들어간다고 생각하면 된다. 이때 핸들러들은 여전히 실행되지 않는다. 현재 코드에서 자유로운 상태가 되었을 때에서야 자바스크립트 엔진은 큐에서 작업을 꺼내 실행한다. 
+> 요약하자면, 어떤 프라미스가 준비되었을 때 이 프라미스의 <code>.then/catch/finally</code> 핸들러가 큐에 들어간다고 생각하면 된다. 이때 핸들러들은 여전히 실행되지 않는다. 현재 코드에서 자유로운 상태가 되었을 때에서야 자바스크립트 엔진은 큐에서 작업을 꺼내 실행한다.
 
-- 만약 여러개의 <code>.then/catch/finally</code>를 사용해 만든 체인의 경우, 각 핸들러는 비동기적으로 실행된다. 
+- 만약 여러개의 <code>.then/catch/finally</code>를 사용해 만든 체인의 경우, 각 핸들러는 비동기적으로 실행된다.
 
 ### 요약
+
 > 모든 프라미스 동작은 '마이크로태스크 큐'라고 불리는 내부 '프라미스 잡' 큐에 들어가서 처리되기 때문에 프라미스 핸들링은 항상 비동기로 처리된다. 따라서 <code>.then/catch/finally</code> 핸들러는 항상 코드가 종료되고 난 후에 호출된다. 만약 어떤 코드 조각을 <code>.then/catch/finally</code>가 호출된 이후에 실행하고 싶다면 <code>.then</code>을 체인에 추가하고 이 안에 코드를 추가하면 된다.
+
+# 프로토타입 메서드와 <code>\_\_proto\_\_</code>가 없는 객체
+
+> <code>**proto**</code> 는 브라우저를 대상으로 개발하고 있다면 다소 구식적인 방법이기 때문에 더는 사용하지 않는 것이 좋다. 대신에 다음과 같은 방법을 사용해야 한다.
+
+- Object.create(proto, [descriptors]): [[Prototype]]이 proto를 참조하는 빈 객체를 만든다. 이때 프로퍼티 설명자를 추가로 넘길 수 있다.
+- Object.getPrototypeOf(obj): obj의 [[Prototype]]을 반환한다.
+- Object.setPrototypeOf(obj, proto): obj의 [[Prototype]]이 proto가 되도록 설정한다.
+
+```
+let animal = {
+  eats: true
+};
+
+// 프로토타입이 animal인 새로운 객체를 생성합니다.
+let rabbit = Object.create(animal);
+
+alert(rabbit.eats); // true
+
+alert(Object.getPrototypeOf(rabbit) === animal); // true
+
+Object.setPrototypeOf(rabbit, {}); // rabbit의 프로토타입을 {}으로 바꿉니다.
+```
+
+### Object.create를 사용하면 for..in을 사용해 프로퍼티를 복사하는 것보다 더 효과적으로 객체를 복제할 수 있다.
+
+```
+let clone = Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescriptors(obj));
+```
+
+> Object.create를 호출하면 obj의 모든 프로퍼티를 포함한 완벽한 사본이 만들어진다.
+
+### Prototype을 변경하지 말아라.
+
+원한다면 언제나 [[Prototype]]을 얻거나 설정할 수 있다. 기술적 제약이 있는 건 아니죠. 하지만 대개는 객체를 생성할 때만 [[Prototype]]을 설정하고 이후엔 수정하지 않습니다. rabbit이 animal을 상속받도록 설정하고 난 이후엔 상속 관계를 잘 변경하지 않습니다.
+
+자바스크립트 엔진은 이런 시나리오를 토대로 최적화되어 있습니다. Object.setPrototypeOf나 obj.**proto**를 써서 프로토타입을 그때그때 바꾸는 연산은 객체 프로퍼티 접근 관련 최적화를 망치기 때문에 성능에 나쁜 영향을 미칩니다. 그러므로 [[Prototype]]을 바꾸는 것이 어떤 결과를 초래할지 확실히 알거나 속도가 전혀 중요하지 않은 경우가 아니라면 [[Prototype]]을 바꾸지 마세요.
+
+### 사용자가 키를 직접 만들지 못하게 하라
+
+> 사용자가 키를 직접 만들 수 있게 허용하면, 내장 **proto**의 getter, setter 떄문에 의도하지 않은 결과가 나올 수 있다. 키가 "**proto**"일 때 에러가 발생할 수 있다.
