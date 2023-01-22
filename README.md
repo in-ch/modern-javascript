@@ -806,3 +806,54 @@ let clone = Object.create(Object.getPrototypeOf(obj), Object.getOwnPropertyDescr
 ### 사용자가 키를 직접 만들지 못하게 하라
 
 > 사용자가 키를 직접 만들 수 있게 허용하면, 내장 **proto**의 getter, setter 떄문에 의도하지 않은 결과가 나올 수 있다. 키가 "**proto**"일 때 에러가 발생할 수 있다.
+
+
+# 참조 타입 
+> 복잡한 상황에서 메서드를 호출하면 this값을 잃어버리는 경우가 발생한다. 
+
+```
+let user = {
+  name: "John",
+  hi() { alert(this.name); },
+  bye() { alert("Bye"); }
+};
+
+user.hi(); // John (간단한 호출은 의도한 대로 잘 동작)
+
+// name에 따라 user.hi나 user.bye가 호출되게 해보자
+(user.name == "John" ? user.hi : user.bye)(); // TypeError: Cannot read property 'name' of undefined
+```
+
+> 뒤에 ()가 있어서 메서드 hi가 즉시 호출될 것이라 예상했으나 원하는데로 되지 않았다. 에러는 메서드를 호출할 때 "this"에 undefined가 할당되었기 때문에 발생한 것이다. 
+
+> <code>user.hi()</code>는 정상적으로 동작하는데 왜 <code>(user.name == "John" ? user.hi : user.bye)();</code>는 오류가 발생하는 것일까? => 원인을 알려면 <code>obj.method()</code>를 호출했을 때, 내부에서 어떤 일이 일어나는지 알아야 한다. 
+
+### 참조 타입 자세히 알아보기 
+> 코드를 보면 obj.method()엔 연산이 두 개 있다는 것을 알 수 있다. 
+
+- 1. '.'은 객체 프로퍼티 <code>obj.method</code>에 접근한다.
+- 2. 괄호 ()는 접근한 프로퍼티(메서드)를 실행한다. 
+
+- 그렇다면 첫 번째 연산에서 얻은 this 정보가 어떻게 두 번째 연산으로 전달될까? 
+- 두 연산을 각각 별도의 줄에 두었다면 this정보를 잃는 건 확실하다. 
+
+```
+let user = {
+  name: "John",
+  hi() { alert(this.name); }
+}
+
+// 메서드 접근과 호출을 별도의 줄에서 실행함
+let hi = user.hi;
+hi(); // this가 undefined이기 때문에 에러가 발생합니다.
+```
+
+> <code>hi = user.hi</code>에서는 함수가 변수에 할당된다. 그런데 마지막 줄과는 완전히 독립적으로 동작하므로 this엔 아무런 값도 저장되지 않는다. 
+> user.hi()를 의도한 대로 동작하기 위해서는 참조 타입 값을 반환하게 한다. 
+> 참조 타입에 속하는 값은 
+  - base: 객체
+  - name: 프로퍼티의 이름
+  - strict: 엄격 모드에서 true
+user.hi로 프로퍼티에 접근하면 함수가 아닌, 참조형(참조 타입) 값을 반환하게 된다. 
+
+* 여기서 참조형 값에 괄호 ()를 붙여 호출하면 객체, 객체의 메서드와 연관된 모든 정보를 받고 이 정보를 기반으로 this(=user)를 결정하게 된다. 
