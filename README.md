@@ -857,3 +857,89 @@ hi(); // this가 undefined이기 때문에 에러가 발생합니다.
 user.hi로 프로퍼티에 접근하면 함수가 아닌, 참조형(참조 타입) 값을 반환하게 된다. 
 
 * 여기서 참조형 값에 괄호 ()를 붙여 호출하면 객체, 객체의 메서드와 연관된 모든 정보를 받고 이 정보를 기반으로 this(=user)를 결정하게 된다. 
+
+# 함수 바인딩
+> setTimeout에 메서드를 전달할 때처럼, 객체 메서드를 콜백으로 전달할 때 <code>this</code>정보가 사라지는 문제가 생긴다. 
+
+### 사라진 this
+> 객체 메서드가 객체 내부가 아닌 다른 곳에 전달되어 호출되면 <code>this</code>가 사라진다.
+  왜냐하면 setTimeout에 객체에서 분리된 함수인 user.say가 전달되기 떄문이다. 
+  브라우저 환경에서 setTimeout 메서드는 this에 window를 할당한다. (Node.js 환경에서는 this가 타이머 객체가 된다.) 따라서 window객체엔 name이 없으므로 undefined가 출력되는 것이다. 
+```
+let user = {
+  name: "in-ch",
+  say() {
+    console.log(this.name);
+  }
+}
+
+setTimeout(user.say, 1000) // undefined가 출력된다.
+
+let f = user.say;
+setTimeout(f, 1000); // user 컨텍스트를 잃어버림
+```
+
+### 해결 방법 
+1. 래퍼 
+> 가장 간단한 해결책은 래퍼 함수를 사용하는 것이다.
+
+```
+setTimeout(() => user.say(), 1000); // 정상 출력
+```
+
+2. bind 
+> 모든 함수는 this를 수정하게 해주는 내장 메서드 <code>bind</code>를 제공한다. 
+  <code>func.bind(context)</code>는 함수처럼 호출 가능한 '특수 객체(exotic object)'를 반환한다. 이 객체를 호출하면 <code>this</code>가 <code>context</code>로 고정된 함수 <code>func</code>가 반환된다. 
+  
+> *한번 bind를 적용하면 bind를 사용해 컨텍스트를 다시 정의할 수 없다.*
+- 예제 1
+```
+let user = {
+  firstName: "John"
+};
+
+function func() {
+  alert(this.firstName);
+}
+
+let funcUser = func.bind(user);
+funcUser(); // John
+```
+
+- 예제 2
+```
+let user = {
+  firstName: "John",
+  say(phrase) {
+    alert(`${phrase}, ${this.firstName}!`);
+  }
+};
+
+let say = user.say.bind(user);
+
+say("Hello"); // Hello, John (인수 "Hello"가 say로 전달되었습니다.)
+say("Bye"); 
+```
+
+- bindAll로 메서드 전체 바인딩하기 
+```
+for (let key in user) {
+  if (typeof user[key] == 'function') {
+    user[key] = user[key].bind(user);
+  }
+}
+```
+
+- 인수도 바인딩이 가능하다. 
+
+```
+function mul(a, b) {
+  return a * b;
+}
+
+let double = mul.bind(null, 2);
+
+alert( double(3) ); // = mul(2, 3) = 6
+alert( double(4) ); // = mul(2, 4) = 8
+alert( double(5) ); // = mul(2, 5) = 10
+```
