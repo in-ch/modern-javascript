@@ -943,3 +943,98 @@ alert( double(3) ); // = mul(2, 3) = 6
 alert( double(4) ); // = mul(2, 4) = 8
 alert( double(5) ); // = mul(2, 5) = 10
 ```
+
+# 오랜된 var
+> 오래된 <code>var</code>는 <code>let</code>과 <code>const</code>와 다르게 동작한다. 따라서 <code>var</code>를 바꾸게 된다면 예상치 못한 에러를 만나게 된다. 
+
+1. var는 블록 스코프가 없다.
+<code>var</code>로 선언한 변수의 스코프는 함수 스코프이거나 전역 스코프이다. 블록 기준으로 스코프가 생기지 않기 때문에 블록 밖에서 접근이 가능하다.
+
+```tsx
+if (true) {
+  var test = true; // 'let' 대신 'var'를 사용했습니다.
+}
+
+alert(test); // true(if 문이 끝났어도 변수에 여전히 접근할 수 있음)
+// var는 코드 블록을 무시하기 때문에 test는 전역 변수가 된다. 전역 스코프에서 이 변수에 접근할 수 있다. 
+```
+
+또한 반복문에서도 유사한 일이 발생한다.
+
+```tsx
+for (var i = 0; i < 10; i++) {
+  // ...
+}
+
+alert(i); // 10, 반복문이 종료되었지만, 'i'는 전역 변수이므로 여전히 접근 가능
+```
+
+단, 코드 블록이 함수 안에 있다면, <code>var</code>는 함수 레벨 변수가 된다.
+```tsx
+function sayHi() {
+  if (true) {
+    var phrase = "Hello";
+  }
+
+  alert(phrase); // 제대로 출력됩니다.
+}
+
+sayHi();
+alert(phrase); // Error: phrase is not defined
+```
+
+2. var는 변수의 중복 선언을 허용한다.
+```tsx
+let user;
+let user; // SyntaxError: 'user' has already been declared
+
+var user = "Pete";
+
+var user = "John"; // 이 "var"는 아무것도 하지 않습니다(이전에 이미 선언됨).
+// ...에러 또한 발생하지 않습니다.
+
+alert(user); // John
+```
+
+3. 선언하기 전 사용할 수 있는 var
+함수 본문 내에서 <code>var</code>로 선언한 변수는 선언 위치와 상관없이 함수 본문이 시작되는 지점에서 정의된다. (단, 변수가 중첩 함수 내에서 정의되지 않아야 이 규칙이 적용된다.)
+
+```tsx
+function sayHi() {
+  phrase = "Hello";
+
+  alert(phrase);
+
+  var phrase;
+}
+sayHi();
+
+
+function sayHi() {
+  var phrase;
+
+  phrase = "Hello";
+
+  alert(phrase);
+}
+sayHi();
+```
+
+위의 코드는 동일하게 동작한다. 또한 코드 블록은 무시되기 때문에, 아래 코드 역시 동일하게 동작한다.
+
+```tsx
+function sayHi() {
+  phrase = "Hello"; // (*)
+
+  if (false) {
+    var phrase;
+  }
+
+  alert(phrase);
+}
+sayHi();
+```
+
+> <code>let</code>과 <code>const</code>로 선언된 변수가 호이스팅이 되지 않는 것은 아니다. 단, 선언하기 전에 사용할 수는 없는데, <code>Cannot access '변수명' before initialization</code> 에러가 나온다. 
+> <code>let</code>과 <code>const</code>로 선언된 변수는 TDZ에 영향을 받기 때문인데, TDZ(일시적 사각지대 같은 느낌이다.)에 있는 변수들은 사용할 수 없다. 
+
