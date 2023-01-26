@@ -1038,3 +1038,36 @@ sayHi();
 > <code>let</code>과 <code>const</code>로 선언된 변수가 호이스팅이 되지 않는 것은 아니다. 단, 선언하기 전에 사용할 수는 없는데, <code>Cannot access '변수명' before initialization</code> 에러가 나온다. 
 > <code>let</code>과 <code>const</code>로 선언된 변수는 TDZ에 영향을 받기 때문인데, TDZ(일시적 사각지대 같은 느낌이다.)에 있는 변수들은 사용할 수 없다. 
 
+# 화살표 함수 다시 살펴보기 
+> 화살표 함수는 단순히 함수를 '짧게' 쓰기 위한 용도로 사용되지 않다. 
+  어딘가에 함수를 전달하게 되면 함수의 컨텍스트를 잃을 수 있다. 이럴 때 화살표 함수를 사용하면 현재 컨텍스트를 잃지 않아 편리하다.
+
+### 화살표 함수에는 'this'가 없습니다.
+> 화살표 함수엔 <code>this</code>가 없다. 화살표 함수 본문에서 <code>this</code>에 접근하면, 외부에서 값을 가져온다. 
+  이런 특징은 객체의 메서드(<code>showList()</code>)안에서 동일 객체의 프로퍼티(<code>students</code>)를 대상으로 순회를 하는 데 사용할 수 있다. 
+```tsx
+let group = {
+  title: "1모둠",
+  students: ["보라", "호진", "지민"],
+
+  showList() {
+    this.students.forEach(
+      student => alert(this.title + ': ' + student)
+    );
+  }
+};
+
+group.showList();
+```
+> 예시의 <code>forEach</code>에서 화살표 함수를 사용했기 때문에 화살표 함수 본문에 있는 <code>this.title</code>은 화살표 함수 바깥에 있는 메서드인 <code>showList</code>가 가리키는 대상과 동일해진다. 즉 <code>this.title</code>은 <code>group.title</code>과 같다. 
+  만약 화살표 함수 대신 일반 함수였다면 에러가 발생했을 것이다. 
+
+### 화살표 함수는 new와 함께 사용할 수 없다.
+> <code>this</code>가 없기 때문에 생성자 함수로 사용할 수 없다는 제약이 있다. 화살표 함수는 <code>new</code>와 함께 호출할 수 없다. 
+
+### 화살표 함수는 어떤 것도 바인딩시키지 않는다. 
+> <code>this</code>의 값을 외부 렉시컬 환경에서 찾는다. 
+
+### 화살표 함수는 super도 없다. 
+
+
