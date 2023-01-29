@@ -1071,3 +1071,156 @@ group.showList();
 ### 화살표 함수는 super도 없다. 
 
 
+# Call/apply와 데코레이터, 포워딩
+> 함수는 이곳저곳 전달될 수 있고, 객체로도 사용될 수 있다. 
+  함수 간에 호출을 어떻게 포워딩하는지, 함수를 어떻게 데코레이팅 하는지에 대해 알아보자.
+
+### 코드 변경 없이 캐싱 기능 추가하기 
+> 래퍼 함수를 사용해서 함수를 캐싱하고 결과를 어딘가에 저장(캐싱)해 재연산에 걸리는 시간을 줄일 수 있다.
+
+> 함수의 행동을 변경시켜주는 함수를 데코레이터(decorator)라고 부른다. 
+> 모든 함수를 대상으로 <code>cachingDecorator</code>를 호출할 수 있는데, 이때 반환되는 것은 캐싱 래퍼이다. 
+
+```tsx
+function slow(x) {
+  // CPU 집약적인 작업이 여기에 올 수 있습니다.
+  alert(`slow(${x})을/를 호출함`);
+  return x;
+}
+
+function cachingDecorator(func) {
+  let cache = new Map();
+
+  return function(x) {
+    if (cache.has(x)) {    // cache에 해당 키가 있으면
+      return cache.get(x); // 대응하는 값을 cache에서 읽어옵니다.
+    }
+
+    let result = func(x);  // 그렇지 않은 경우엔 func를 호출하고,
+
+    cache.set(x, result);  // 그 결과를 캐싱(저장)합니다.
+    return result;
+  };
+}
+
+slow = cachingDecorator(slow);
+
+alert( slow(1) ); // slow(1)이 저장되었습니다.
+alert( "다시 호출: " + slow(1) ); // 동일한 결과
+
+alert( slow(2) ); // slow(2)가 저장되었습니다.
+alert( "다시 호출: " + slow(2) ); // 윗줄과 동일한 결과
+```
+
+- 이렇게 사용하면 이점은 다음과 같다.
+1. <code>cachingDecorator</code>를 사용할 수 있다. 원하는 함수 어디에든 <code>cachingDecorator</code>를 적용할 수 있다.
+2. 캐싱 로직이 분리되어 <code>slow</code>자체의 복잡성이 증가하지 않는다.
+3. 필요하다면 여러 개의 데코레이터를 조합해서 사용할 수도 있다. (추가 데코레이터는 <code>cachingDecorator</code> 뒤를 따른다.)
+
+### 'func.call'를 사용해 컨텍스트 지정하기
+> 사실 위에 캐싱 데코레이터는 객체 메서드에 사용하기엔 적합하지 않는다.
+  객체 메서드 <code>worker.slow()</code>는 데코레이터 적용 후 제대로 동작하지 않는다.
+
+```tsx
+// worker.slow에 캐싱 기능을 추가해봅시다.
+let worker = {
+  someMethod() {
+    return 1;
+  },
+
+  slow(x) {
+    // CPU 집약적인 작업이라 가정
+    alert(`slow(${x})을/를 호출함`);
+    return x * this.someMethod(); // (*)
+  }
+};
+
+// 이전과 동일한 코드
+function cachingDecorator(func) {
+  let cache = new Map();
+  return function(x) {
+    if (cache.has(x)) {
+      return cache.get(x);
+    }
+    let result = func(x); // (**)
+    cache.set(x, result);
+    return result;
+  };
+}
+
+alert( worker.slow(1) ); // 기존 메서드는 잘 동작합니다.
+
+worker.slow = cachingDecorator(worker.slow); // 캐싱 데코레이터 적용
+
+alert( worker.slow(2) ); // 에러 발생!, Error: Cannot read property 'someMethod' of undefined
+```
+
+(*)로 표시한 줄에서 <code>this.someMethod</code> 접근에 실패했기 때문에 에러가 발생했다.
+원인은 (**)로 표시한 줄에서 래퍼가 기존 함수 <code>func(x)</code>를 호출하면 <code>this</code>가 <code>undefined</code>가 되기 때문이다.
+아래 코드도 비슷한 증상이 나온다.
+
+```tsx
+let func = worker.slow;
+func(2);
+```
+* 왜냐하면 레퍼가 기존 메서드 호출 결과를 전달하려 했지만 <code>this</code>의 컨택스트가 사라졌기 떄문에 에러가 발생하는 것이다. 
+* 만약 이를 수정하기 위해서 <code>this</code>를 명시적으로 고정해 함수를 호출할 수 있게 해주는 내장 함수 메서드 <code>func.call(context, ...args)</code>를 사용해야 한다.
+
+```tsx
+func.call(context, arg1, arg2, ...)
+
+func(1, 2, 3);
+func.call(obj, 1, 2, 3) // 차이점은 func.call에선 this가 obj로 고정된다는 것이다. 
+```
+
+```tsx
+function sayHi() {
+  alert(this.name);
+}
+
+let user = { name: "John" };
+let admin = { name: "Admin" };
+
+// call을 사용해 원하는 객체가 'this'가 되도록 합니다.
+sayHi.call( user ); // this = John
+sayHi.call( admin ); // this = Admin
+```
+
+- 이걸 사용해 래퍼 안에서 <code>call</code>을 사용해 컨텍스트를 원본 함수로 전달하면 에러가 발생하지 않는다.
+
+```tsx
+let worker = {
+  someMethod() {
+    return 1;
+  },
+
+  slow(x) {
+    alert(`slow(${x})을/를 호출함`);
+    return x * this.someMethod(); // (*)
+  }
+};
+
+function cachingDecorator(func) {
+  let cache = new Map();
+  return function(x) {
+    if (cache.has(x)) {
+      return cache.get(x);
+    }
+    let result = func.call(this, x); // 이젠 'this'가 제대로 전달됩니다.
+    cache.set(x, result);
+    return result;
+  };
+}
+
+worker.slow = cachingDecorator(worker.slow); // 캐싱 데코레이터 적용
+
+alert( worker.slow(2) ); // 제대로 동작합니다.
+alert( worker.slow(2) ); // 제대로 동작합니다. 다만, 원본 함수가 호출되지 않고 캐시 된 값이 출력됩니다.
+```
+
+### this는 어떤 과정을 거치게 될까
+1. 데코레이터를 적용한 후에 <code>worker.slow</code>는 래퍼 <code>function (x) {...}가 된다.</code>
+
+2. <code>worker.slow(2)</code>를 실행하면 래퍼 2를 인수로 받고, <code>this = worker</code>가 된다.
+
+3. 결과가 캐시되지 않는 상황이라면 <code>func.call(this,x)</code>에서 현재 <code>this (=worker)와 인수(=2)</code>를 원본 메서드에 전달한다. 
