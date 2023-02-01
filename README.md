@@ -1224,3 +1224,69 @@ alert( worker.slow(2) ); // 제대로 동작합니다. 다만, 원본 함수가 
 2. <code>worker.slow(2)</code>를 실행하면 래퍼 2를 인수로 받고, <code>this = worker</code>가 된다.
 
 3. 결과가 캐시되지 않는 상황이라면 <code>func.call(this,x)</code>에서 현재 <code>this (=worker)와 인수(=2)</code>를 원본 메서드에 전달한다. 
+
+### 여러 인수 전달하기 
+> 이제 복수 인수를 가진 메서드, <code>worker.slow</code>를 캐싱해보자.
+
+```tsx
+let worker = {
+  slow(min, max) {
+    return min + max;
+  }
+};
+
+worker.slow = cachingDecorator(worker.slow);
+```
+> 이걸 캐싱해볼 거다. 해결 방법은 다음과 같다.
+1. 복수 키를 지원하는 맵과 유사한 자료 구조 구현하기
+2. 중첩 맵을 사용하기 <code>(max, result)</code> 쌍 저장은 <code>cache.set(min)</code>으로, result는 <code>cache.get(min).get(max)</code>을 사용
+3. 두 값을 하나로 합치기, 맵의 키로 문자열 <code>"min, max"</code>를 사용, 여러 값을 하나로 합치는 코든느 해싱 함수에 구현해 유연성을 높임. (이걸 사용할 것이다.)
+
+let worker = {
+  slow(min, max) {
+    alert(`slow(${min},${max})을/를 호출함`);
+    return min + max;
+  }
+};
+
+```tsx
+function cachingDecorator(func, hash) {
+  let cache = new Map();
+  return function() {
+    let key = hash(arguments); // (*)
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+
+    let result = func.call(this, ...arguments); // (**)
+
+    cache.set(key, result);
+    return result;
+  };
+}
+
+function hash(args) {
+  return args[0] + ',' + args[1];
+}
+
+worker.slow = cachingDecorator(worker.slow, hash);
+
+alert( worker.slow(3, 5) ); // 제대로 동작합니다.
+alert( "다시 호출: " + worker.slow(3, 5) ); // 동일한 결과 출력(캐시된 결과)
+```
+
+- <code>*</code>로 표시한 줄에서 hash가 호출되면서 <code>arguments</code>를 사용한 단일 키가 만들어짐. 
+- <code>**</code>로 표시한 줄에선 <code>func.call(this, ...arguments)</code>를 상ㅇ해 컨텍스트(this)와 래퍼가 가진 인수 전부 (...arguments)를 기존 함수에 전달. 
+
+### func.apply 
+> func.call 대신 func.apply 사용 가능. 
+  차이점은 <code>call</code>이 복수 인수를 따로따로 받는 대신, <code>apply</code>는 인수를 유사 배열 객체로 받는다. 
+
+```tsx
+func.call(context, ...args); // 전개 문법을 사용해 인수가 담긴 배열을 전달하는 것과
+func.apply(context, args);   // call을 사용하는 것은 동일
+```
+
+### 요약
+- 데코레이터는 함수를 감싸는 래퍼로 함수의 행동을 변화시킨다. 다만 주요 작업은 여전히 함수에서 처리
+- 데코레이터는 함수에 추가된 '기능' 혹은 '면' 정도로 보면 된다. 하나 혹은 여러 개의 데코레이터를 추가해도 함수의 코드는 변경되지 않는다. 
