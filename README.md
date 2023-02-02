@@ -1290,3 +1290,49 @@ func.apply(context, args);   // call을 사용하는 것은 동일
 ### 요약
 - 데코레이터는 함수를 감싸는 래퍼로 함수의 행동을 변화시킨다. 다만 주요 작업은 여전히 함수에서 처리
 - 데코레이터는 함수에 추가된 '기능' 혹은 '면' 정도로 보면 된다. 하나 혹은 여러 개의 데코레이터를 추가해도 함수의 코드는 변경되지 않는다. 
+
+
+# 커링 (Currying)
+> <code>커링</code>은 함수와 함께 사용할 수 있는 고급 기술이다.
+  <code>func(a,b,c)</code>처럼 단일 호출로 처리하는 함수를 <code>func(a)(b)(c)</code>와 같이 각각의 인수가 호출 가능한 프로세스로 호출된 후 병합되도록 변환하는 것이다. 
+  커링은 함수를 호출하지 않는다. 단지 변환할 뿐이다. 
+  사용하는 이유는 가독성을 높이고 함수의 작동방식을 명확하게 하여 유지보수하는데 도움을 주기 위해서다. 
+
+```tsx
+const curry = f => a => b => f(a, b);
+
+// f에 전달된 함수
+const sum = (a, b) => a + b;
+
+const curriedSum = curry(sum);
+
+console.log(curriedSum(1)(2)); // 3
+```
+
+### 고급 커링 구현
+
+```tsx
+function curry(func) {
+
+  return function curried(...args) {
+    if (args.length >= func.length) {
+      return func.apply(this, args);
+    } else {
+      return function(...args2) {
+        return curried.apply(this, args.concat(args2));
+      }
+    }
+  };
+}
+
+function sum(a, b, c) {
+  return a + b + c;
+}
+
+let curriedSum = curry(sum);
+
+alert( curriedSum(1, 2, 3) ); // 6, 보통때 처럼 단일 callable 형식으로 호출하기
+alert( curriedSum(1)(2,3) ); // 6, 첫 번째 인수를 커링하기
+alert( curriedSum(1)(2)(3) ); // 6, 모두 커링하기
+```
+
