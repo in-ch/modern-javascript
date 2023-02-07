@@ -1359,4 +1359,54 @@ alert(sayHi.name); // sayHi
 ### length 프로퍼티 
 > 내장 프로퍼티 <code>length</code>는 함수 매개변수의 개수를 반환한다. 
 
+# BigInt
+> <code>BigInt</code>는 길이의 제약 없이 정수를 다룰 수 있게 해주는 숫자형이다.  
+  정수 리터럴 끝에 <code>n</code>을 붙이거나 함수 <code>BigInt</code>를 호출하면 문자열이나 숫자를 가지고 <code>BigInt</code> 타입의 값을 만들 수 있다. 
 
+```tsx
+const bigint = 1234567890123456789012345678901234567890n;
+
+const sameBigint = BigInt("1234567890123456789012345678901234567890");
+
+const bigintFromNumber = BigInt(10); // 10n과 동일합니다.
+```
+
+- 일반 숫자와 큰 차이 없이 사용할 수 있다. 
+1. 5/2 결과엔 소수부가 없다. <code>BigInt</code>형 값을 반환하기 때문에
+2. <code>BigInt</code>형 값과 일반 숫자를 섞어서 사용할 순 없다.
+```tsx
+alert(1n + 2n); // 3
+alert(5n / 2n); // 2
+alert(1n + 2); // Error: Cannot mix BigInt and other types
+```
+
+- 만약 굳이 섞어서 쓰고 싶다면 형 변환을 해서 섞어 써야 한다. 
+
+```tsx
+let bigint = 1n;
+let number = 2;
+
+// 숫자를 bigint로
+alert(bigint + BigInt(number)); // 3
+
+// bigint를 숫자로
+alert(Number(bigint) + number); // 3
+```
+
+- 비교 연산자
+> 비교 연산도 모두 사용할 수 있다.
+
+```tsx
+alert( 2n > 1n ); // true
+alert( 2n > 1 ); // true
+
+alert( 1 == 1n ); // true
+alert( 1 === 1n ); // false
+```
+
+- 논리 연산
+> if 안에서도 일반 숫자와 동일하게 행동한다. 
+```tsx
+alert( 1n || 2 ); // 1 (1n은 truthy로 판단)
+alert( 0n || 2 ); // 2 (0n은 falsy로 판단)
+```
