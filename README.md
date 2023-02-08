@@ -1406,7 +1406,83 @@ alert( 1 === 1n ); // false
 
 - 논리 연산
 > if 안에서도 일반 숫자와 동일하게 행동한다. 
+
 ```tsx
 alert( 1n || 2 ); // 1 (1n은 truthy로 판단)
 alert( 0n || 2 ); // 2 (0n은 falsy로 판단)
 ```
+
+# console.log 잘 활용하기 
+> 만약 정보가 많다면 그냥 <code>,</code>로 하게 되면 읽기가 굉장히 어렵다. 
+
+```tsx
+const name = 'in-ch'
+const age = 29
+const job = 'Front end development engineer'
+const hobbies = 'reading book'
+
+console.log(name, age, job, hobbies);
+```
+<img width="238" alt="스크린샷 2023-02-08 오후 10 56 55" src="https://user-images.githubusercontent.com/49556566/217550194-702f46ab-b9fc-49f2-b0c2-547aaa24ce8d.png">
+
+> 객체로 하면 더 깔끔하게 보여진다. 
+
+```tsx
+const name = 'in-ch'
+const age = 29
+const job = 'Front end development engineer'
+const hobbies = 'reading book'
+
+console.log({name, age, job, hobbies});
+```
+<img width="233" alt="스크린샷 2023-02-08 오후 10 58 23" src="https://user-images.githubusercontent.com/49556566/217550468-09f1d0ae-8d1e-4de0-bf41-0926dc2d3826.png">
+
+- CSS style도 활용 가능하다. 
+
+```tsx
+console.log('%cin-ch', 'color: purple; font-size: 28px');
+```
+<img width="258" alt="스크린샷 2023-02-08 오후 11 00 28" src="https://user-images.githubusercontent.com/49556566/217550973-f7ed50a8-00e9-41cc-ba7c-e5dcbd840a2c.png">
+
+- console.time() & console.timeEnd()
+
+```tsx
+let count = 0
+
+console.time();
+for (let i = 0; i < 1000000000; i++) {
+  count++
+}
+console.timeEnd();
+```
+<img width="233" alt="스크린샷 2023-02-08 오후 11 01 50" src="https://user-images.githubusercontent.com/49556566/217551308-dd3ce731-9d83-427d-bb05-244307e95cdc.png">
+
+- console.table()
+
+```tsx
+const foods = [
+  {
+    name: '🍔',
+    price: 8000,
+    group: 1,
+  },
+  {
+    name: '🍨',
+    price: 5000,
+    group: 1,
+  },
+  {
+    name: '🍿',
+    price: 3000,
+    group: 2,
+  },
+  {
+    name: '🍵',
+    price: 4000,
+    group: 2,
+  },
+];
+
+console.table(foods);
+```
+<img width="253" alt="스크린샷 2023-02-08 오후 11 03 59" src="https://user-images.githubusercontent.com/49556566/217551849-6b68a2d5-3643-4a65-9397-05d4d72abc7e.png">
