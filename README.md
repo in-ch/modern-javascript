@@ -34,7 +34,7 @@
  - use strict를 취소할 방법은 없다.
  - 브라우저 콘솔을 사용하는 경우 use strict가 적용되어 있지 않다.
  
- - Next.js에서는 React의 Strict Mode를 사용할 수 있다
+ - Next.js에서는 React의 Strict Mode를 통해 엄격 모드를 사용할 수 있다
  ```ts
  // next.config.js
  module.exports = {
