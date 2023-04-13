@@ -787,6 +787,9 @@
 
 # 마이크로태스크
 
+<details>
+ <summary>자세히 보기</summary>
+
 > 프라미스 핸들러 <code>.them/catch/finally</code>는 항상 비동적으로 실행된다.
 > 프라미스가 즉시 이행되더라도 <code>.then/catch/finally</code> 아래에 있는 코드는 이 핸들러들이 실행되기 전에 실행된다.
 
@@ -817,7 +820,12 @@ alert("코드 종료"); // 얼럿 창이 가장 먼저 뜸.
 
 > 모든 프라미스 동작은 '마이크로태스크 큐'라고 불리는 내부 '프라미스 잡' 큐에 들어가서 처리되기 때문에 프라미스 핸들링은 항상 비동기로 처리된다. 따라서 <code>.then/catch/finally</code> 핸들러는 항상 코드가 종료되고 난 후에 호출된다. 만약 어떤 코드 조각을 <code>.then/catch/finally</code>가 호출된 이후에 실행하고 싶다면 <code>.then</code>을 체인에 추가하고 이 안에 코드를 추가하면 된다.
 
+</details>
+
 # 프로토타입 메서드와 <code>\_\_proto\_\_</code>가 없는 객체
+
+<details>
+ <summary>자세히 보기</summary>
 
 > <code>**proto**</code> 는 브라우저를 대상으로 개발하고 있다면 다소 구식적인 방법이기 때문에 더는 사용하지 않는 것이 좋다. 대신에 다음과 같은 방법을 사용해야 한다.
 
@@ -909,7 +917,13 @@ user.hi로 프로퍼티에 접근하면 함수가 아닌, 참조형(참조 타�
 
 * 여기서 참조형 값에 괄호 ()를 붙여 호출하면 객체, 객체의 메서드와 연관된 모든 정보를 받고 이 정보를 기반으로 this(=user)를 결정하게 된다. 
 
+</details>
+
 # 함수 바인딩
+
+<details>
+ <summary>자세히 보기</summary>
+
 > setTimeout에 메서드를 전달할 때처럼, 객체 메서드를 콜백으로 전달할 때 <code>this</code>정보가 사라지는 문제가 생긴다. 
 
 ### 사라진 this
@@ -995,7 +1009,13 @@ alert( double(4) ); // = mul(2, 4) = 8
 alert( double(5) ); // = mul(2, 5) = 10
 ```
 
+</details>
+
 # 오랜된 var
+
+<details>
+ <summary>자세히 보기</summary>
+
 > 오래된 <code>var</code>는 <code>let</code>과 <code>const</code>와 다르게 동작한다. 따라서 <code>var</code>를 바꾸게 된다면 예상치 못한 에러를 만나게 된다. 
 
 1. var는 블록 스코프가 없다.
@@ -1089,7 +1109,13 @@ sayHi();
 > <code>let</code>과 <code>const</code>로 선언된 변수가 호이스팅이 되지 않는 것은 아니다. 단, 선언하기 전에 사용할 수는 없는데, <code>Cannot access '변수명' before initialization</code> 에러가 나온다. 
 > <code>let</code>과 <code>const</code>로 선언된 변수는 TDZ에 영향을 받기 때문인데, TDZ(일시적 사각지대 같은 느낌이다.)에 있는 변수들은 사용할 수 없다. 
 
+</details>
+
 # 화살표 함수 다시 살펴보기 
+
+<details>
+ <summary>자세히 보기</summary>
+ 
 > 화살표 함수는 단순히 함수를 '짧게' 쓰기 위한 용도로 사용되지 않다. 
   어딘가에 함수를 전달하게 되면 함수의 컨텍스트를 잃을 수 있다. 이럴 때 화살표 함수를 사용하면 현재 컨텍스트를 잃지 않아 편리하다.
 
@@ -1342,8 +1368,13 @@ func.apply(context, args);   // call을 사용하는 것은 동일
 - 데코레이터는 함수를 감싸는 래퍼로 함수의 행동을 변화시킨다. 다만 주요 작업은 여전히 함수에서 처리
 - 데코레이터는 함수에 추가된 '기능' 혹은 '면' 정도로 보면 된다. 하나 혹은 여러 개의 데코레이터를 추가해도 함수의 코드는 변경되지 않는다. 
 
+</details>
 
 # 커링 (Currying)
+
+<details>
+ <summary>자세히 보기</summary>
+ 
 > <code>커링</code>은 함수와 함께 사용할 수 있는 고급 기술이다.
   <code>func(a,b,c)</code>처럼 단일 호출로 처리하는 함수를 <code>func(a)(b)(c)</code>와 같이 각각의 인수가 호출 가능한 프로세스로 호출된 후 병합되도록 변환하는 것이다. 
   커링은 함수를 호출하지 않는다. 단지 변환할 뿐이다. 
@@ -1387,7 +1418,13 @@ alert( curriedSum(1)(2,3) ); // 6, 첫 번째 인수를 커링하기
 alert( curriedSum(1)(2)(3) ); // 6, 모두 커링하기
 ```
 
+</details>
+
 # 객체로서의 함수와 기명 함수 표현식
+
+<details>
+ <summary>자세히 보기</summary>
+ 
 > 모든 값은 자료형을 가지고 있는데, 함수의 자료형은 객체이다.
   함수는 호출이 가능한(callable) '행동 객체'라고 이해하면 된다. 
   우리는 함수를 호출할 수 있을 뿐만 아니라 객체처럼 함수에 프로퍼티를 추가, 제거하거나 참조를 통해 전달 할 수도 있다.
@@ -1462,8 +1499,14 @@ alert( 1 === 1n ); // false
 alert( 1n || 2 ); // 1 (1n은 truthy로 판단)
 alert( 0n || 2 ); // 2 (0n은 falsy로 판단)
 ```
+</details>
+
 
 # console.log 잘 활용하기 
+
+<details>
+ <summary>자세히 보기</summary>
+ 
 > 만약 정보가 많다면 그냥 <code>,</code>로 하게 되면 읽기가 굉장히 어렵다. 
 
 ```tsx
@@ -1537,3 +1580,6 @@ const foods = [
 console.table(foods);
 ```
 <img width="253" alt="스크린샷 2023-02-08 오후 11 03 59" src="https://user-images.githubusercontent.com/49556566/217551849-6b68a2d5-3643-4a65-9397-05d4d72abc7e.png">
+
+</details>
+
