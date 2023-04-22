@@ -1649,6 +1649,7 @@ describe("주어진 숫자의 n 제곱", function() {
 
 <details>
  <summary>자세히 보기</summary>
+ 
 - 프라미스가 거부되면 제어 흐름이 제일 가까운 rejection 핸들러로 넘어가기 때문에 프라미스 체인을 사용하면 에러를 쉽게 처리할 수 있다. 
 - <code>.catch</code>는 첫번째 핸들러일 필요가 없고 하나 혹은 여러 개의 <code>.then</code> 뒤에 올 수 있다. 
 - 정상적인 경우라면 <code>.catch</code>는 절대 트리거 되지 않는다. 그러나 네트워크 문제, 잘못된 형식의 JSON 등으로 인해 프라미스 중 하나라도 거부되면 <code>.catch</code>에서 에러를 잡게 된다. 
