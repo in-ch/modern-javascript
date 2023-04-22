@@ -1645,3 +1645,76 @@ describe("주어진 숫자의 n 제곱", function() {
 ```
 </details>
 
+# 프라미스와 에러 핸들링 
+
+<details>
+ <summary>자세히 보기</summary>
+- 프라미스가 거부되면 제어 흐름이 제일 가까운 rejection 핸들러로 넘어가기 때문에 프라미스 체인을 사용하면 에러를 쉽게 처리할 수 있다. 
+- <code>.catch</code>는 첫번째 핸들러일 필요가 없고 하나 혹은 여러 개의 <code>.then</code> 뒤에 올 수 있다. 
+- 정상적인 경우라면 <code>.catch</code>는 절대 트리거 되지 않는다. 그러나 네트워크 문제, 잘못된 형식의 JSON 등으로 인해 프라미스 중 하나라도 거부되면 <code>.catch</code>에서 에러를 잡게 된다. 
+
+예시)
+```tsx
+fetch('https://no-such-server.blabla') // 거부
+  .then(response => response.json())
+  .catch(err => alert(err))
+```
+
+### 암시적 try...catch
+> <code>프라미스 executor</code>와 <code>프라미스 핸들러 코드</code> 주위엔 '보이지 않는 (암시적)' <code>try...catch</code>가 있다.
+
+- 아래 두 코드는 똑같이 동작한다,
+- <code>executor</code> 주위의 암시적  <code>try...catch</code>는 스스로 에러를 잡고, 에러를 거부상태의 프라미스로 변경시킨다.
+
+```tsx
+new Promise((resolve, reject) => {
+  throw new Error("에러 발생!");
+}).catch(alert); // Error: 에러 발생!
+```
+
+```tsx
+new Promise((resolve, reject) => {
+  reject(new Error("에러 발생!"));
+}).catch(alert); // Error: 에러 발생!
+```
+
+예시)
+```tsx
+new Promise((resolve, reject) => {
+  resolve("OK");
+}).then((result) => {
+  blabla(); // 존재하지 않는 함수
+}).catch(alert); // ReferenceError: blabla is not defined
+```
+- 여기서 마지막 <code>.catch</code>는 이렇게 명시적인 거부뿐만 아니라 핸들러 위쪽에서 발생한 비정상 에러 또한 잡는다.
+
+### 처리되지 못한 거부
+> 만약 <code>.catch</code>를 추가하지 못한 경우는 어떻게 될까?
+1. 스크립트가 죽고 콘솔 창에 메시지가 출력된다.
+2. 자바스크립트 엔진은 프라미스 거부를 추적하다가 전역 에러를 생헝하게 된다. 
+
+- 브라우저 환경에서 이런 에러는 <code>unhandledrejection</code>이벤트로 처리할 수 있다. 
+
+```tsx
+window.addEventListener('unhandledrejection', function(event) {
+  // unhandledrejection 이벤트엔 두 개의 특수 프로퍼티가 있습니다.
+  alert(event.promise); // [object Promise] - 에러를 생성하는 프라미스
+  alert(event.reason); // Error: 에러 발생! - 처리하지 못한 에러 객체
+});
+
+new Promise(function() {
+  throw new Error("에러 발생!");
+}); // 에러를 처리할 수 있는 .catch 핸들러가 없음
+```
+
+### <code>try...catch</code>는 동기적 에러만 처리할 수 있다.
+```tsx
+new Promise(function(resolve, reject) {
+  setTimeout(() => {
+    throw new Error("에러 발생!");
+  }, 1000);
+}).catch(alert);
+```
+
+여기서 에러는 <code>executor(실행자, 실행 함수)</code>가 실행되는 동안이 아니라 나중에 발생한다. 따라서 프라미스는 에러를 처리할 수 없다. 
+</details>
