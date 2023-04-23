@@ -1719,3 +1719,59 @@ new Promise(function(resolve, reject) {
 
 여기서 에러는 <code>executor(실행자, 실행 함수)</code>가 실행되는 동안이 아니라 나중에 발생한다. 따라서 프라미스는 에러를 처리할 수 없다. 
 </details>
+
+# 브라우저 환경과 다양한 명세서
+
+<details>
+ <summary>자세히 보기</summary>
+
+> 자바스크립트는 본래 웹 브라우저에서 사용하려고 만든 언어이지만 진화를 거쳐 다양한 사용자와 플랫폼을 지원하는 언어로 변모하였다. 
+
+- 자바스크립트가 돌아가는 플랫폼은 Host(호스트)라고 부른다. (웹서버, 심지어 커피 머신도 호스트가 될 수 있다.)
+- 호스트 환경은 플랫폼에 특정되는 객체와 함수를 제공한다. (웹 브라우저는 웹페이지를 제어하기 위한 수단, Node.js는 서버 사이드 기능 등을 제공)
+
+### 호스트 환경이 웹 브라우저일 때 사용할 수 있는 기능 
+<img width="377" alt="스크린샷 2023-04-23 오후 4 56 35" src="https://user-images.githubusercontent.com/49556566/233827300-8b7e694a-00c3-49bc-be6b-e2b1ba0ce173.png">
+
+대표적인 예로 최상단엔 <code>window</code>라 불리는 '루트' 객체가 있다. 
+
+- <code>window</code>는 자바스크립트 코드의 전역 객체이다.
+- 브라우저 창(browser window)를 대변하고, 이를 제공할 수 있는 메서드를 제공
+
+### 문서 객체 모델(DOM)
+
+> <code>문서 객체 모델</code>은 웹 페이지 내의 모든 콘텐츠를 객체로 나타내준다. 이 객체는 추후 수정이 가능해집니다. 
+
+> <code>document</code> 객체는 페이지의 기본 '진입점' 역할을 합니다. <code>document</code> 객체를 이용해 페이지 내 무엇이든 변경할 수 있고 원하는 것을 만들 수 있습니다.
+
+```tsx
+// 배경을 붉은색으로 변경하기
+document.body.style.background = "red";
+
+// 1초 후 원상태로 복구하기
+setTimeout(() => document.body.style.background = "", 1000);
+```
+
+> <code>DOM</code>은 브라우저만을 위한 모델이 아닙니다.
+<code>DOM</code> 명세서엔 문서의 구조와 이를 조작할 수 있는 객체에 대한 설명이 담겨있습니다. 예를 들어서 HTML 페이지를 다운로드하고 이를 가공해주는 서버 사이드 스크립트에서도 <code>DOM</code>을 사용할 수 있습니다. 
+
+### 스타일링을 위한 CSSOM
+> CSS 규칙과 스타일시트는 HTML과 다른 구조를 띱니다. 따라서 CSS 규칙과 스타일시트를 객체로 나타내고 이 객체를 읽고 쓸지에 대한 설명을 담은 <code>CSS 객체 모델(CSSOM)</code>이 따로 존재합니다.
+
+
+### 브라우저 객체 모델 (BOM)
+> <code>브라우저 객체 모델(BOM)</code>은 문서 이외의 모든 것을 제어하기 위해 브라우저(호스트)가 제공하는 추가 겍체를 나타냅니다.
+
+ex) navigator, location 
+```tsx
+alert(location.href); // 현재 URL을 보여줌
+if (confirm("위키피디아 페이지로 가시겠습니까?")) {
+  location.href = "https://wikipedia.org"; // 새로운 페이지로 넘어감
+}
+```
+
+
+
+
+
+</details>
