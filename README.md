@@ -1720,6 +1720,74 @@ alert("코드 종료"); // 얼럿 창이 가장 먼저 뜸.
 
 </details>
 
+# 프라미스 API
+
+<details>
+ <summary>자세히 보기</summary>
+
+> <code>Promise</code> 클래스는 5가지 정적 메서드가 있다. 
+
+### Promise.all
+> 복수의 URL에 동시에 요청을 보내고, 다운로드가 모두 완료된 후에 콘텐츠를 처리할 때 사용한다. 
+```tsx
+Promise.all([
+  new Promise(resolve => setTimeout(() => resolve(1), 3000)), // 1
+  new Promise(resolve => setTimeout(() => resolve(2), 2000)), // 2
+  new Promise(resolve => setTimeout(() => resolve(3), 1000))  // 3
+]).then(alert); 
+```
+- <code>Promise.all</code>은 요소 전체가 프라미스인 배열(엄밀히 따지면 이터러블 객체이지만, 대개는 배열임)을 받고 새로운 프라미스를 반환한다. 
+- 배열 안 프라미스가 모두 처리되면 새로운 프라미스가 이행되는데, 배열 안 프라미스의 결과값을 담은 배열이 새로운 프라미스의 <code>result</code>가 된다. 
+- 위의 예제는 프라미스 전체가 처리되면 1,2,3이 반환된다. <code>Promise.all</code>의 첫번째 프라미스는 가장 늦게 이해오디더라도 처리 결과는 배열의 첫 번째 요소에 저장된다. 
+- <code>Promise.all</code>에 전달되는 프라미스 중 하나라도 거부되면 <code>Promise.all</code>이 반환하는 프라미스는 에러와 함께 바로 거부된다. -> 배열에 저장된 다른 프라미스의 결과가 완전히 무시된다. 
+- <code>Promise.all</code>에는 취소라는 개념이 없어서 최소되지 않는다. 
+
+### Promise.allSettled 
+> <code>Promise.all</code>이 하나라도 취소되면 다 취소되기 때문에 하나가 실패해도 다른 요청 결과가 필요할 때 사용할 수 있다.
+```tsx
+let urls = [
+  'https://api.github.com/users/iliakan',
+  'https://api.github.com/users/Violet-Bora-Lee',
+  'https://no-such-url'
+];
+
+Promise.allSettled(urls.map(url => fetch(url)))
+  .then(results => { // (*)
+    results.forEach((result, num) => {
+      if (result.status == "fulfilled") {
+        alert(`${urls[num]}: ${result.value.status}`);
+      }
+      if (result.status == "rejected") {
+        alert(`${urls[num]}: ${result.reason}`);
+      }
+   });
+ });
+  
+/*결과값*/
+[
+  {status: 'fulfilled', value: ...응답...},
+  {status: 'fulfilled', value: ...응답...},
+  {status: 'rejected', reason: ...에러 객체...}
+] 
+```
+- 다만 <code>Promise.all</code>는 구버전에서 지원하지 않기때문에 폴리필을 구현해야 한다. 
+
+### Promise.race
+> <code>Promise.race</code>는 가장 빨리 처리상태가 완료된 프라미스의 결과값을 리턴한다. 말그대로 레이스에서 승리한 결과만 리턴한다.
+```tsx
+Promise.race([
+  new Promise((resolve, reject) => setTimeout(() => resolve(1), 1000)),
+  new Promise((resolve, reject) => setTimeout(() => reject(new Error("에러 발생!")), 2000)),
+  new Promise((resolve, reject) => setTimeout(() => resolve(3), 3000))
+]).then(alert); // 결과값: 1
+```
+
+### Promise.resolve와 Promise.reject
+<code>Promise.resolve</code> <code>Promise.reject</code>는 <code>async</code>과 <code>await</code>를 쓰면 된다. 근래에는 거의 안씀.. 
+
+</details>
+
+
 # 브라우저 환경과 다양한 명세서
 
 <details>
