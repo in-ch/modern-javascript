@@ -1838,3 +1838,28 @@ if (confirm("위키피디아 페이지로 가시겠습니까?")) {
 }
 ```
 </details>
+
+# 제너레이터
+
+<details>
+ <summary>자세히 보기</summary>
+ 
+> 일반 함수는 하나의 값(혹은 0개의 값)만을 반환한다. 하지만 <code>제너레이터(generator)</code>를 사용하면 여러 개의 값을 필요에 따라 하나씩 반환(yield)할 수 있으며, 제너레이터와 이터러블 객체를 함께 사용하면 손쉽게 데이터 스트림을 만들 수 있다.
+
+### 제너레이터 함수
+
+```tsx
+function* generateSequence() {
+  yield 1;
+  yield 2;
+  return 3;
+}
+```
+> 제너레이터 함수는 일반 함수와 동작 방식이 다르다. 제너레이터 함수를 호출하면 코드가 실행되지 않고, 대신 실행을 처리하는 특별 객체, <code>제너레이터 객체</code>가 반환된다.
+> <code>next()</code>는 제너레이터의 주요 메서드이다. <code>next()</code>를 호출하면 가장 가까운 <code>yield <value></code>문을 만날 때까지 실행이 지속된다. (value를 생략할 수도 있는데, 이 경우엔 undefined이 됨.). 이후, <code>yield <value></code>문을 만나면 실행이 멈추고 산출하고자 하는 값인 <code>value</code>가 바깥 코드에 반환된다.
+
+- next()는 항상 아래 두 프로퍼티를 가진 객체를 반환
+
+1. <code>value</code>: 산출 값
+2. <code>done</code>: 함수 코드 실행이 끝났으면 true, 아니라면 false
+</details>
