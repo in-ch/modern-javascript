@@ -1896,7 +1896,7 @@ alert(JSON.stringify(three)); // {value: 3, done: true}
 ### <code>function* f{...} vs function *f(...)</code>
 
 > 둘 중에 어느 것이 맞을까??
-  <code>*</code>는 종류를 나타내는 것이지 이름을 나타내는 것이 아니므로 <code>*</code>는 <code>function</code>에 붙여야 한다. 
+  <code>"*"</code>는 종류를 나타내는 것이지 이름을 나타내는 것이 아니므로 <code>"*"</code>는 <code>function</code>에 붙여야 한다. 
   
 ### 제너레이터 컴포지션
 
