@@ -1862,4 +1862,72 @@ function* generateSequence() {
 
 1. <code>value</code>: 산출 값
 2. <code>done</code>: 함수 코드 실행이 끝났으면 true, 아니라면 false
+
+ex) 제너레이터를 이용해 첫 번째 산출 값을 받는 예시
+```tsx
+function* generateSequence() {
+  yield 1;
+  yield 2;
+  return 3;
+}
+
+let generator = generateSequence();
+
+let one = generator.next();
+
+alert(JSON.stringify(one));
+```
+
+- 여기서 <code>generator.next()</code>를 다시 호출해보자.
+
+```tsx
+let two = generator.next();
+
+alert(JSON.stringify(two)); // {value: 2, done: false}
+```
+
+- 마지막으로 <code>generator.next()</code>를 다시 호출하면 <code>return</code>에 다다르고 함수가 종료된다.
+```tsx
+let three = generator.next();
+
+alert(JSON.stringify(three)); // {value: 3, done: true}
+```
+
+### <code>function* f{...} vs function *f(...)</code>
+
+> 둘 중에 어느 것이 맞을까??
+  <code>*</code>는 종류를 나타내는 것이지 이름을 나타내는 것이 아니므로 <code>*</code>는 <code>function</code>에 붙여야 한다. 
+  
+### 제너레이터 컴포지션
+
+> <code>제너레이터 컴포지션</code>은 제너레이터 안에 제너레이터를 임베딩 할 수 있는 기능이다. <code>yield*</code>를 사용하면 된다. 
+
+ex) 예시
+```tsx
+function* generateSequence(start, end) {
+  for (let i = start; i <= end; i++) yield i;
+}
+
+function* generatePasswordCodes() {
+
+  // 0..9
+  yield* generateSequence(48, 57);
+
+  // A..Z
+  yield* generateSequence(65, 90);
+
+  // a..z
+  yield* generateSequence(97, 122);
+
+}
+
+let str = '';
+
+for(let code of generatePasswordCodes()) {
+  str += String.fromCharCode(code);
+}
+
+alert(str);
+```
+
 </details>
