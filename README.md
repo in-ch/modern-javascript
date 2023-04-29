@@ -1929,5 +1929,57 @@ for(let code of generatePasswordCodes()) {
 
 alert(str);
 ```
+### <code>yield</code>를 사용해 제네레이터 안, 밖으로 정보 교환하기 
+
+- <code>yield</code>는 결과를 바깥으로 전달할 뿐만 아니라 값을 제너레이터 안으로 전달하는 것도 가능하다.
+- 값을 안, 밖으로 전달하려면 <code>generator.next(arg)</code>를 호출해야 한다. 이때 인수 <code>arg</code>는 <code>yield</code>의 결과가 된다.
+- 일반 함수와 다르게 제너레이터의 외부 호출 코드는 <code>next/yield</code>를 이용해 결과를 전달 및 교환한다. 
+
+예시)
+```tsx
+function* gen() {
+  // 질문을 제너레이터 밖 코드에 던지고 답을 기다립니다.
+  let result = yield "2 + 2 = ?"; // (*)
+
+  alert(result);
+}
+
+let generator = gen();
+
+let question = generator.next().value; // <-- yield는 value를 반환
+
+generator.next(4); // --> 결과를 제너레이터 안으로 전달
+```
+
+1. <code>generator.next()</code>를 처음 호출할 땐 항상 인수가 없어야 한다. 인수가 넘어오더라도 무시되어야 한다. <code>generator.next()</code>를 호출하면 실행이 시작되고 첫 번째 <code>yield "2+2=?"</code>의 결과가 반환된다. 이 시점에는 제너레이터가 (*)로 표시한 줄에서 실행을 잠시 멈춘다.
+2. 그 후 <code>yield</code>의 결과가 제너레이터를 호출하는 <code>question</code>에 할당된다.
+3. 마지막에 <code>generator.next(4)</code>에서 제너레이터가 다시 시작되고 4는 <code>result</code>에 할당된다. 
+
+예시 2) 
+```tsx
+function* gen() {
+  let ask1 = yield "2 + 2 = ?";
+
+  alert(ask1); // 4
+
+  let ask2 = yield "3 * 3 = ?"
+
+  alert(ask2); // 9
+}
+
+let generator = gen();
+
+alert( generator.next().value ); // "2 + 2 = ?"
+
+alert( generator.next(4).value ); // "3 * 3 = ?"
+
+alert( generator.next(9).done ); // true
+```
+
+1. 제너레이터 객체가 만들어지고 첫 번째 .next()가 호출되면, 실행이 시작되고 첫 번째 yield에 다다름,
+2. 산출 값은 바깥 코드로 반환
+3. 두 번째 <code>.next(4)</code>는 첫 번째 <code>yield</code>의 결과가 될 4를 제너레이터 안으로 전달, 그리고 다시 실행
+4. 실행 흐름이 두 번째 <code>yield</code>에 다다르고, 산출 값("3 * 3 = ?")이 제너레이터 호출 결과가 됨.
+5. 세 번째 next(9)는 두 번째 yield의 결과가 될 9를 제너레이터 안으로 전달, 그리고 실행이 이어지는데, <code>done: true</code>이므로 제너레이터 함수 종료 
 
 </details>
