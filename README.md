@@ -1982,4 +1982,26 @@ alert( generator.next(9).done ); // true
 4. 실행 흐름이 두 번째 <code>yield</code>에 다다르고, 산출 값("3 * 3 = ?")이 제너레이터 호출 결과가 됨.
 5. 세 번째 next(9)는 두 번째 yield의 결과가 될 9를 제너레이터 안으로 전달, 그리고 실행이 이어지는데, <code>done: true</code>이므로 제너레이터 함수 종료 
 
+### generator.throw
+
+> <code>제너레이터</code>를 사용할 때 외부 코드가 에러를 만들거나 던질 수도 있다.
+  에러를 <code>yield</code> 안으로 전달하려면 <code>generator.throw(err)</code>를 호출해야 한다. <code>generator.throw(err)</code>를 호출하게 되면 <code>err</code>는 <code>yield</code>가 있는 줄로 던져진다.
+
+예시)
+```tsx
+function* generate() {
+  let result = yield "2 + 2 = ?"; // Error in this line
+}
+
+let generator = generate();
+
+let question = generator.next().value;
+
+try {
+  generator.throw(new Error("데이터베이스에서 답을 찾지 못했습니다."));
+} catch(e) {
+  alert(e); // 에러 출력
+}
+```
+
 </details>
