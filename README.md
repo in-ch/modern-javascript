@@ -2005,3 +2005,143 @@ try {
 ```
 
 </details>
+
+# async 이터레이터와 제너레이터
+
+<details>
+ <summary>자세히 보기</summary>
+
+> <code>비동기 이터레이터(asyncchronous iterator)</code>를 사용하면 비동기적으로 들어오는 데이터를 필요에 따라 처리할 수 있다.
+  네트워크를 통해 데이터가 여러 번에 걸쳐 들어오는 상황을 처리할 수 있게 된다. 
+  <code>비동기 이터레이터(asyncchronous iterator)</code>를 사용하면 이런 상황을 쉽게 해결할 수 있다. 
+  
+### async 이터레이터
+- 비동기 이터레이터는 일반 이터레이터와 유사하다. (약간의 문법적인 차이는 있다.) 
+
+ex) 일반적인 이터러블 객체 
+```tsx
+let range = {
+ from: 1,
+ to: 5,
+ 
+ // for..of 최초 실행 시, Symbol.iterator가 호출
+ [Symbol.iterator]() {
+  // Symbol.iterator 메서드는 이터레이터 객체를 반환 
+  // 이후 for..of 는 반환된 이터레이터 객체만을 대상으로 동작,
+  // 다음 값은 next()에서 정해짐 
+  return {
+   current: this.from,
+   last: this.to,
+   
+   // for..of 반복문에 의해 각 이터레이션마다 next()가 호출
+   next() {
+    // next()는 객체 형태의 값, {done:.., value: ..} 를 반환 
+    if(this.current <= this.last) {
+     return { done: false, value: this.current++ };
+    } else {
+     return { done: true };
+    }
+   }
+  }
+ }
+}
+
+for(let value of range) {
+ alert(value); // 1, 2, 3, 4, 5
+}
+```
+
+ex) 비동기 이터러블 객체 
+```tsx
+let range = {
+  from: 1,
+  to: 5,
+
+  // for await..of 최초 실행 시, Symbol.asyncIterator가 호출
+  [Symbol.asyncIterator]() {
+    // Symbol.asyncIterator 메서드는 이터레이터 객체를 반환
+    // 이후 for await..of는 반환된 이터레이터 객체만을 대상으로 동작하는데, 다음 값은 next()에서 정해짐
+    return {
+      current: this.from,
+      last: this.to,
+
+      // for await..of 반복문에 의해 각 이터레이션마다 next()가 호출
+      async next() {
+        //  next()는 객체 형태의 값, {done:.., value :...}를 반환
+        // (객체는 async에 의해 자동으로 프라미스로 감싸짐.)
+
+        // 비동기로 무언가를 하기 위해 await를 사용
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        if (this.current <= this.last) {
+          return { done: false, value: this.current++ };
+        } else {
+          return { done: true };
+        }
+      }
+    };
+  }
+};
+
+(async () => {
+  for await (let value of range) {
+    alert(value); // 1,2,3,4,5
+  }
+})()
+```
+
+- 객체를 비동기적으로 반복 가능하도록 하려면, <code>Symbol.asyncIterator</code> 메서드가 반드시 구현되어 있어야 한다.
+- 프라미스를 반환하는 메서드인 <code>next()</code>가 구현된 객체를 반환해야 한다.
+- <code>next()</code>는 꼭 <code>async</code> 메서드일 필요는 없다. 
+- 전개 문법 <code>...</code>은 비동기적으로 동작하지 않는다. 
+  <code>alert( [...range] ); // Symbol.iterator가 없기 때문에 에러 발생</code> -> 전개 문법은 <code>await</code>가 없는 <code>for..of</code>와 마찬가지로 <code>Symbol.asyncIterator</code>가 아닌 <code>Symbol.iterator</code>를 찾기 때문에 에러가 발생
+
+### async 제너레이터 
+
+- 일반 제너레이터는 동기적 문법이므로 모든 값은 동기적으로 생산되고 <code>await</code>를 사용할 수 없다. 
+- 단 <code>async</code>를 제너레이터 함수 앞에 붙여줌으로써 비동기적으로 사용할 수 있다. 
+- <code>async 제너레이터</code>의 <code>generator.next()</code>메서드는 비동기적이 되고, 프라미스를 반환한다는 점은 일반 제너레이터와 async 제너레이터의 또 다른 차이점이다. 
+  <code>await</code>을 <code>next()</code>에 붙여줘야 한다. 
+
+```tsx
+async function* generateSequence(start, end) {
+  for (let i = start; i <= end; i++) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    yield i;
+  }
+}
+
+(async () => {
+  let generator = generateSequence(1, 5);
+  for await (let value of generator) {
+    alert(value); // 1, 2, 3, 4, 5
+  }
+})();
+```
+
+### async 이터러블 
+
+```tsx
+let range = {
+  from: 1,
+  to: 5,
+
+  async *[Symbol.asyncIterator]() { // [Symbol.asyncIterator]: async function*()와 동일
+    for(let value = this.from; value <= this.to; value++) {
+      // 값 사이 사이에 약간의 공백
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      yield value;
+    }
+  }
+};
+
+(async () => {
+  for await (let value of range) {
+    alert(value); // 1, 2, 3, 4, 5
+  }
+})();
+```
+
+- <code>async *[Symbol.asyncIterator]()</code>는 <code>async function*()</code>와 동일하다. 
+
+</details>
