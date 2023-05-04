@@ -2145,3 +2145,62 @@ let range = {
 - <code>async *[Symbol.asyncIterator]()</code>는 <code>async function*()</code>와 동일하다. 
 
 </details>
+
+# Proxy와 Reflect
+
+<details>
+ <summary>자세히 보기</summary>
+ 
+> <code>Proxy</code>는 특정 객체를 감싸 프로퍼티 읽기, 쓰기와 같은 객체에 가해지는 작업을 중간에서 가로채는 객체로, 가로채진 작업은 <code>Proxy</code> 자체에서 처리되기도 하고, 원래 객체가 처리하도록 그대로 전달되기도 함.
+  <code>Proxy</code>는 다양한 라이브러리와 몇몇 브라우저 프레임워크에서 사용되고 있다. 
+  
+### Proxy
+```tsx
+let proxy = new Proxy(target, handler);
+```
+- <code>target</code> : 감싸게될 객체로, 함수를 포함한 모든 객체 가능
+- <code>handler</code> : 동작을 가로채는 메서드인 '트랩(trap)'이 담긴 객체로, 여기서 프락시를 설정 (예시: get 트랩은 target의 프로퍼티를 읽을 때, set 트랩은 target의 프로퍼티를 쓸 때 활성화됨)
+- <code>proxy</code>에 작업이 가해지고, <code>handler</code>에 작업과 상용하는 트랩이 있으면 트랩이 실행되어 프락시가 이 작업을 처리할 기회를 얻게 된다. 트랩이 없으면 <code>target</code>에 작업을 직접 수행함. -> 트랩이 없으면 <code>proxy</code>는 <code>target</code>을 둘러싸는 투명한 래퍼가 된다. 
+- 요약: <code>handler</code>가 비어있으면 <code>Proxy</code>에 가해지는 작업은 <code>target</code>에 곧바로 전달
+
+ex) 트랩이 없는 프락시 예시
+```tsx
+let target = {};
+let proxy = new Proxy(target, {}); // 빈 핸들러
+
+proxy.test = 5; // proxy.test=를 이용해 값을 쓰면 target에 새로운 값이 설정
+alert(target.test);
+
+alert(proxy.test); // proxy.test를 이용해 값을 읽으면 target에서 값을 읽어옴.
+
+for(let key in proxy) alert(key); // proxy를 대상으로 반복 작업을 하면 target에 저장된 값이 반환
+```
+
+### get 트랩으로 프로퍼티 기본값 설정하기 
+
+- 프로퍼티 읽기를 가로채려면 <code>handler</code>에 <code>get(target, property, receiver)</code> 메서드가 있어야 한다.
+- <code>get</code>메서드는 프로퍼티를 읽으려고 할 때 작동한다. -> 인수는 다음과 같다.
+ 1. <code>target</code> - 동작을 전달할 객체로 <code>new Proxy</code>의 첫 번째 인자.
+ 2. <code>property</code> - 프로퍼티 이름
+ 3. <code>receiver</code> - 타깃 프로퍼티가 getter라면 <code>receiver</code>는 getter가 호출될 때 <code>this</code>이다. 대개는 <code>proxy</code> 객체 자신이 <code>this</code>가 된다. 프락시 객체를 상속받은 객체가 있다면 해당 객체가 <code>this</code>가 되기도 한다. 
+
+ex) 예제
+```tsx
+let numbers = [0, 1, 2];
+
+numbers = new Proxy(numbers, {
+  get(target, prop) {
+    if (prop in target) {
+      return target[prop];
+    } else {
+      return 0; // 기본값
+    }
+  }
+});
+
+alert( numbers[1] ); // 1
+alert( numbers[123] ); // 0 (해당하는 요소가 배열에 없으므로 0이 반환됨)
+```
+
+</details>
+
