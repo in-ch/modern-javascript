@@ -2202,5 +2202,43 @@ alert( numbers[1] ); // 1
 alert( numbers[123] ); // 0 (해당하는 요소가 배열에 없으므로 0이 반환됨)
 ```
 
+- <code>dictiionary</code>를 프락시로 감싸서 프로퍼티를 읽으려고 할 때 이를 프락시가 가로채도록 하면 우리가 원하는 기능을 구현할 수 있다.
+
+```tsx
+let dictionary = {
+  'Hello': '안녕하세요',
+  'Bye': '안녕히 가세요'
+};
+
+dictionary = new Proxy(dictionary, {
+  get(target, phrase) { // 프로퍼티를 읽기를 가로챕니다.
+    if (phrase in target) { // 조건: 사전에 구절이 있는 경우
+      return target[phrase]; // 번역문을 반환합니다
+    } else {
+      // 구절이 없는 경우엔 구절 그대로를 반환합니다.
+      return phrase;
+    }
+  }
+});
+
+// 사전을 검색해봅시다!
+// 사전에 없는 구절을 입력하면 입력값이 그대로 반환됩니다.
+alert( dictionary['Hello'] ); // 안녕하세요
+alert( dictionary['Welcome to Proxy']); // Welcome to Proxy (입력값이 그대로 출력됨)
+```
+
+### set 트랩으로 프로퍼티 값 검증하기
+
+- 숫자만 저장할 수 있는 배열을 만들고 싶다고 가정한다면, 숫자형이 아닌 값을 추가하려고 하면 에러가 발생하도록 해야 한다.
+- 이를 구현하기 위해 프로퍼티에 값을 쓰려고 할 때 이를 가로채는 <code>set</code> 트랩을 사용해 이를 구현해보도록 하겠다. 
+
+ex) <code>set(target, property, value, receiver)</code>
+- <code>target</code>: 동작을 전달할 객체로 <code>new Proxy</code>의 첫 번째 인자.
+- <code>property</code>: 프로퍼티 이름
+- <code>value</code>: 프로퍼티 값
+- <code>receiver</code>: <code>get</code> 트랩과 유사하게 동작하는 객체로, setter 프로퍼티에만 관여
+
+<code>set</code> 트랩은 숫자형 값을 설정하려 할 때만 <code>true</code>를, 그렇지 않은 경우엔 (<code>TypeError</code>)가 트리거되고) <code>false</code>를 반환하도록 해야 한다.
+
 </details>
 
