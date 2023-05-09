@@ -2240,5 +2240,50 @@ ex) <code>set(target, property, value, receiver)</code>
 
 <code>set</code> 트랩은 숫자형 값을 설정하려 할 때만 <code>true</code>를, 그렇지 않은 경우엔 (<code>TypeError</code>)가 트리거되고) <code>false</code>를 반환하도록 해야 한다.
 
+```tsx
+let numbers = [];
+
+numbers = new Proxy(numbers, { // (*)
+  set(target, prop, val) { // 프로퍼티에 값을 쓰는 동작을 가로챕니다.
+    if (typeof val == 'number') {
+      target[prop] = val;
+      return true;
+    } else {
+      return false;
+    }
+  }
+});
+
+numbers.push(1); // 추가가 성공했습니다.
+numbers.push(2); // 추가가 성공했습니다.
+alert("Length is: " + numbers.length); // 2
+
+numbers.push("test"); // Error: 'set' on proxy
+
+alert("윗줄에서 에러가 발생했기 때문에 이 줄은 절대 실행되지 않습니다.");
+```
+ - 배열 관련 기능들은 여전히 사용 가능하다. -> 프락시를 사용해도 기존에 있던 기능은 절대로 손상되지 않는다.
+ - <code>push</code>나 <code>unshift</code>같이 배열에 값을 추가해주는 메서드들은 내부에서 <code>[[Set]]</code>을 사용하고 있기 때문에 메서드를 오버라이드 하지 않아도 프락시가 동작을 가로채고 값을 검증해준다. 
+ - <code>set</code> 트랩을 사용할 땐 값을 쓰는 게 성공했을 때 반드시 <code>true</code>를 반환해줘야 한다. <code>true</code>를 반환하지 않았거나 falsy한 값을 반환하게 되면 <code>TypeError</code>가 발생한다. 
+ 
+### ownKey와 getOwnPropertyDescriptor로 반복하기 
+ - <code>Object.keys</code>, <code>for..in</code> 반복문을 비롯한 프로퍼티 순환 관련 메서드 대다수는 내부 메서드 <code>[[OwnPropertyKeys]]</code>(트랩 메서드는 ownKeys임)를 사용해 프로퍼티 목록을 얻는다.
+ - 단, 세부 동작 방식엔 차이가 있다. 
+ 
+ 1. <code>Object.getOwnPropertyNames(obj)</code> – 심볼형이 아닌 키만 반환
+ 2. <code>Object.getOwnPropertySymbols(obj)</code> – 심볼형 키만 반환
+ 3. <code>Object.keys/values()</code> – <codeenumerable</code> 플래그가 true이면서 심볼형이 아닌 키나 심볼형이 아닌 키에 해당하는 값 전체를 반환
+ 4. <code>for...in</code> 반복문 - <codeenumerable</code> 플래그가 true인 심볼형이 아닌 키, 프로토타입 키를 순회
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 </details>
 
