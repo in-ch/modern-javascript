@@ -2272,8 +2272,8 @@ alert("윗줄에서 에러가 발생했기 때문에 이 줄은 절대 실행되
  
  1. <code>Object.getOwnPropertyNames(obj)</code> – 심볼형이 아닌 키만 반환
  2. <code>Object.getOwnPropertySymbols(obj)</code> – 심볼형 키만 반환
- 3. <code>Object.keys/values()</code> – <codeenumerable</code> 플래그가 true이면서 심볼형이 아닌 키나 심볼형이 아닌 키에 해당하는 값 전체를 반환
- 4. <code>for...in</code> 반복문 - <codeenumerable</code> 플래그가 true인 심볼형이 아닌 키, 프로토타입 키를 순회
+ 3. <code>Object.keys/values()</code> – <code>enumerable</code> 플래그가 true이면서 심볼형이 아닌 키나 심볼형이 아닌 키에 해당하는 값 전체를 반환
+ 4. <code>for...in</code> 반복문 - <code>enumerable</code> 플래그가 true인 심볼형이 아닌 키, 프로토타입 키를 순회
 
  
  
