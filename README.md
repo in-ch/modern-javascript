@@ -2274,16 +2274,42 @@ alert("윗줄에서 에러가 발생했기 때문에 이 줄은 절대 실행되
  2. <code>Object.getOwnPropertySymbols(obj)</code> – 심볼형 키만 반환
  3. <code>Object.keys/values()</code> – <code>enumerable</code> 플래그가 true이면서 심볼형이 아닌 키나 심볼형이 아닌 키에 해당하는 값 전체를 반환
  4. <code>for...in</code> 반복문 - <code>enumerable</code> 플래그가 true인 심볼형이 아닌 키, 프로토타입 키를 순회
+</details>
+ 
+# 객체를 원시형으로 변환하기 
 
+<details>
+ <summary>자세히 보기</summary>
  
+ > 객체를 연산하면 어떻게 될까? ex) <code>obj1 + obj2</code> -> 이 경우 객체는 원시값으로 변환되고, 그 후 의도한 연산이 수행된다. 
+ - 객체는 논리 평가시 <code>true</code>를 반환한다. 
+ - 숫자형으로 변환은 수학 관련 함수를 적용할 때 일어난다. ex) <code>Date</code> 객체 끼리 빼면 두 날짜의 시간 차이가 반환된다.
+ - 문자형으로의 형 변환은 대개 <code>alert(obj)</code> 같이 객체를 출력하려고 할 때 일어난다.
  
+ ### ToPrimitive
+ > 특수 객체 메서드를 사용하면 숫자형이나 문자형으로의 형 변환을 원하는 대로 조절할 수 있다.
+   객체 형 변환은 세 종류로 구분되는데 <code>hint</code>라 불리는 값이 구분 기준이 된다. 
+   <code>hint</code>는 '목표로 하는 자료형' 정도로 이해하면 된다. 
  
+ - <code>String</code>
+ > <code>alert</code> 함수같이 문자열을 기대하는 연산을 수행할 때는 hint가 <code>string</code>이 된다.
  
+ - <code>number</code>
+ > 수학 연산을 적용하려 할 때(객체-숫자형 변환), hint는 <code>number</code>가 된다. 
  
+ - <code>default</code>
+ > 연산자가 기대하는 자료형이 '확실하지 않을 때' hint는 <code>default</code>가 된다.
+   연산자 ==를 사용해 객체-문자형, 객체-숫자형, 객체-심볼형끼리 비교할 때도, 객체를 어떤 자료형으로 바꿔야 할지 확신이 안 서므로 hint는 default가 된다. 
  
+ - 크고 작음을 비교하는 <code>></code>, <code><</code>는 원래 문자형과 숫자형 둘다 허용하지만 <code>hint</code>는 <code>number</code>로 고정된다. 
+ - <code>boolean</code> hint는 없다. 모든 객체는 그냥 <code>true</code>로 평가된다. 
  
+ - 자바스크립트는 형 변환이 필요할 때, 아래와 같은 순서로 원하는 메서드를 찾고 호출한다. 
+ 1. 객체에 <code>obj[Symbol.toPrimitive](hint)</code>메서드가 있는지 찾고, 있다면 메서드를 호출
+    <code>Symbol.toPrimitive</code>는 시스템 심볼로, 심볼형 키로 사용
+ 2. 1에 해당하지 않고 hint가 <code>"string"</code>이라면, <code>obj.toString()</code>이나 <code>obj.valueOf()</code>를 호출(존재하는 메서드만 실행됨).
+ 3. 1과 2에 해당하지 않고, hint가 <code>"number"</code>나 <code>"default"</code>라면 <code>obj.valueOf()</code>나 <code>obj.toString()</code>을 호출합니다(존재하는 메서드만 실행됨).
  
  
  
 </details>
-
