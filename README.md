@@ -2310,6 +2310,51 @@ alert("윗줄에서 에러가 발생했기 때문에 이 줄은 절대 실행되
  2. 1에 해당하지 않고 hint가 <code>"string"</code>이라면, <code>obj.toString()</code>이나 <code>obj.valueOf()</code>를 호출(존재하는 메서드만 실행됨).
  3. 1과 2에 해당하지 않고, hint가 <code>"number"</code>나 <code>"default"</code>라면 <code>obj.valueOf()</code>나 <code>obj.toString()</code>을 호출합니다(존재하는 메서드만 실행됨).
  
+ ### <code>Symbol.toPrimitive</code>
+ - 내장 심볼이다.
+ - 목표로 하는 자료형(hint)를 명명하는 데 사용된다.
+ ```tsx
+ obj[Symbol.toPrimitive] = function(hint) {
+  // 반드시 원시값을 반환
+  // hint는 "string", "number", "default" 중 하나가 될 수 있다.
+};
+ ```
  
+ 예제)
+ ```tsx
+ let user = {
+  name: "John",
+  money: 1000,
+
+  [Symbol.toPrimitive](hint) {
+    alert(`hint: ${hint}`);
+    return hint == "string" ? `{name: "${this.name}"}` : this.money;
+  }
+};
+
+// 데모:
+alert(user); // hint: string -> {name: "John"}
+alert(+user); // hint: number -> 1000
+alert(user + 500); // hint: default -> 1500
+```
+ - 이렇게 메서드를 구현해 놓으면 <code>user</code>는 hint에 따라 문자열로 변환되기도 하고 돈이라는 숫자로 변환되기도 한다. 
+ - <code>user[Symbol.toPrimitive]</code>로 이렇게 메서드 하나로 모든 종류의 형 변환을 다룰 수 있다.
+ 
+ ### 반환 타입
+ - <code>toString()</code>, <code>valueOf()</code>, <code>Symbol.toPrimitive</code>는 'hint'에 명시된 자료형으로의 형 변환을 보장해 주지 않는다. 
+ - <code>toString()</code>이 항상 문자열을 반환하리라는 보장이 없고, <code>Symbol.toPrimitive</code>의 hint가 "number"일 때 항상 숫자형 자료가 반환되리라는 보장이 없다.
+ - 한가지 확신할 수 있는 건 객체가 아닌 원시값을 반환해 준다는 것이다. 
+ - <code>toString()</code>, <code>valueOf()</code>가 객체를 반환해도 에러를 발생하지 않는다. 다만 이때는 반환 값이 무시되고, 메서드 자체가 존재하지 않았던 것처럼 동작한다.
+ - 이러한 이유는 과거 자바스크립트엔 '에러'라는 개념이 잘 정립되어 있지 않았기 떄문이다. 반면에 <code>Symbol.toPrimitive</code>는 무조건 원시자료를 반환해야 한다. 
+ 
+ ### 요약 
+ > 연산자별로 어떤 hint가 적용되는지는 명세서에서 찾아볼 수 있다. 연산자가 기대하는 피연산자를 '확신할 수 없을 때’에는 hint가 <code>"default"</code>가 된다. 이런 경우는 아주 드물게 발생. 내장 객체는 대개 hint가 <code>"default"</code>일 때와 <code>"number"</code> 일 때를 동일하게 처리한다. 따라서 실무에선 hint가 <code>"default"</code>인 경우와 <code>"number"</code>인 경우를 합쳐서 처리하는 경우가 많다.
+
+- 객체-원시형 변환엔 다음 알고리즘이 적용
+
+ 1. 객체에 <code>obj[Symbol.toPrimitive](hint)</code>메서드가 있는지 찾고, 있다면 호출
+ 2. 1에 해당하지 않고 hint가 <code>"string"</code>이라면, <code>obj.toString()</code>이나 <code>obj.valueOf()</code>를 호출
+ 3. 1과 2에 해당하지 않고, hint가 <code>"number"</code>나 <code>"default"</code>라면 <code>obj.valueOf()</code>나 <code>obj.toString()</code>을 호출
+ 4. <code>obj.toString()</code>만 사용해도 <code>'모든 변환’</code>을 다 다룰 수 있기 때문에, 실무에선 <code>obj.toString()</code>만 구현해도 충분한 경우가 많다. 반환 값도 <code>‘사람이 읽고 이해할 수 있는’</code> 형식이기 때문에 실용성 측면에서 다른 메서드에 뒤처지지 않는다. <code>obj.toString()</code>은 로깅이나 디버깅 목적으로도 자주 사용
  
 </details>
