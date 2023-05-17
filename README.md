@@ -2358,3 +2358,63 @@ alert(user + 500); // hint: default -> 1500
  4. <code>obj.toString()</code>만 사용해도 <code>'모든 변환’</code>을 다 다룰 수 있기 때문에, 실무에선 <code>obj.toString()</code>만 구현해도 충분한 경우가 많다. 반환 값도 <code>‘사람이 읽고 이해할 수 있는’</code> 형식이기 때문에 실용성 측면에서 다른 메서드에 뒤처지지 않는다. <code>obj.toString()</code>은 로깅이나 디버깅 목적으로도 자주 사용
  
 </details>
+ 
+# 동적으로 모듈 가져오기
+ 
+<details>
+ <summary>자세히 보기</summary>
+ 
+ - <code>export</code>문이나 <code>export</code> 문은 <code>정적인</code> 방식이다. 단순하지만 제약사항이 있다.
+ - 제약 사항
+ 1. <code>import</code>문에 동적 매개변수를 사용할 수 없다.
+    ex) 
+    ```tsx
+    import ... from getModuleName(); // 에러 발생 !!!
+    ```
+ 2. 런타임이나 조건부로 모듈을 불러올 수 없다.
+    ```tsx
+    if(...) {
+      import ...; // 모듈을 조건부로 불러올 수 없으므로 에러 발생
+    }
+
+    {
+      import ...; // import 문은 블록 안에 올 수 없으므로 에러 발생
+    }
+    ```
+ - 이러한 제약사항이 만들어진 이유는 <code>export</code>문이나 <code>export</code>는 코드 구조의 중심을 잡아주는 역할을 하기 때문이다. 
+   코드 구조를 분석해 모듈을 한데 모아 번들링하고, 사용하지 않는 모듈은 제거(가지치기)해야 하는데, 코드 구조가 간단하고 고정되어있을 때만 이런 작업이 가능하다.
+ 
+ ### 동적으로 가져오려면 <code>import</code> 표현식
+ 
+ <code>import(module)</code> 표현식은 모듈을 읽고 이 모듈이 내보내는 것들을 모두 포함하는 객체를 담은 이행된 프라미스를 반환하며 어디에서든 호출이 가능하다.
+ > 단, <code>import()</code>는 함수 호출과 문법이 유사해 보이긴 하지만 함수 호출은 아니다. <code>super()</code>처럼 괄호를 쓰는 특별한 문법 중 하나이다. 따라서 <code>import</code>를 변수에 복사하거나 <code>call/apply</code>를 사용하는 것이 불가능하다. -> 함수가 아니기 떄문
+ 
+ ```tsx
+ let modulePath = prompt("어떤 모듈을 불러오고 싶으세요?");
+
+ import(modulePath)
+  .then(obj => <모듈 객체>)
+  .catch(err => <로딩 에러, e.g. 해당하는 모듈이 없는 경우>)
+ 
+ let {hi, bye} = await import('./say.js');
+
+ hi();
+ bye();
+ ```
+ 
+ 만약 <code>export default</code>를 사용하면 다음과 같이 사용하면 된다. <code>default</code>를 쓰면 된다. 
+ ```tsx
+ // 📁 say.js
+ export default function() {
+   alert("export default한 모듈을 불러왔습니다!");
+ }
+ 
+ let obj = await import('./say.js');
+ let say = obj.default;
+ // 위 두 줄을 let {default: say} = await import('./say.js'); 같이 한 줄로 줄일 수 있습니다.
+
+ say();
+ ```
+ 
+ 
+</details>
