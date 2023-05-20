@@ -2415,6 +2415,62 @@ alert(user + 500); // hint: default -> 1500
 
  say();
  ```
+
+</details>
+
+# 롱 폴링 
+
+<details>
+ <summary>자세히 보기</summary>
  
+ > 폴링(long polling)을 사용하면 웹소켓이나 server-sent event 같은 특정한 프로토콜을 사용하지 않아도 아주 간단히 서버와 지속적인 커넥션을 유지할 수 있다. 
+ 
+ ### Regular Polling
+ - 방식
+  1. 서버는 먼저 클라이언트가 온라인 상태임을 인식
+  2. 해당 시점까지 받은 메시지 패킷을 보낸다.
+
+ - 단점
+  1. 메시지는 최대 10초까지 지연되어 전달된다.
+  2. 메시지가 없는 경우에도 사용자가 다른 곳으로 전환하거나 절전 모드에 있는 경우에도 10초마다 서버에 요청이 전송된다. 
+ > 따라서 성능적으로 한계가 있다. (서비스 규모가 작은 경우 폴링은 꽤 괜찮은 방식)
+ 
+### Long polling
+> 롱 폴링은 일반 폴링보다 더 나은 방식이다. -> 지연 없이 메시지를 전달한다. 
+- 방식
+  1. 요청이 서버로 전송된다.
+  2. 서버는 보낼 메시지가 있을 때까지 연결을 닫지 않는다.
+  3. 메시지가 나타나면 서버는 요청을 응답한다.
+  4. 브라우저가 즉시 새 요청을 한다. 
+ 
+ - 롱 폴링을 구현한 함수 <code>subscribe</code>는 <code>fetch</code>를 사용해 요청을 보내고 응답이 올 때까지 기다린다음 응답을 처리하고 스스로 다시 요청을 보낸다. 
+ ex) 
+ ```tsx
+  async function subscribe() {
+   let response = await fetch("/subscribe");
+
+   if (response.status == 502) {
+     // Status 502 is a connection timeout error,
+     // may happen when the connection was pending for too long,
+     // and the remote server or a proxy closed it
+     // let's reconnect
+     await subscribe();
+   } else if (response.status != 200) {
+     // An error - let's show it
+     showMessage(response.statusText);
+     // Reconnect in one second
+     await new Promise(resolve => setTimeout(resolve, 1000));
+     await subscribe();
+   } else {
+     // Get and show the message
+     let message = await response.text();
+     showMessage(message);
+     // Call subscribe() again to get the next message
+     await subscribe();
+   }
+ }
+
+ subscribe();
+ ```
  
 </details>
