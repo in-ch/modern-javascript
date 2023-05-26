@@ -2572,7 +2572,53 @@ alert(user + 500); // hint: default -> 1500
  
  </details>
  
+# 커스텀 에러와 에러 확장
  
+<details>
+ <summary>자세히 보기</summary>
+
+> 개발을 하다 보면 자체 에러 클래스가 필요한 경우가 종종 생긴다.
+  네트워크 관련 작업 중 에러가 발생했다면 <code>HttpError</code>, 데이터베이스 관련 작업 중 에러가 발생했다면 <code>DbError</code>, 
+  검색 관련 작업 중 에러가 발생했다면 <code>NotFoundError</code>를 사용하는 것이 직관적이기 때문이다.
+
+ > 직접 에러 클래스를 만든 경우, 이 에러들은 <code>message</code>이나 <code>name</code>, 가능하다면 <code>stack</code> 프로퍼티를 지원해야 한다. 
+   물론 이런 프로퍼티 이외에도 다른 프로퍼티를 지원할 수 있다. 
+   <code>HttpError</code> 클래스의 객체에 <code>statusCode</code> 프로퍼티를 만들고 404나 403, 500같은 숫자를 값으로 지정할 수 있다.
+ 
+ > <code>throw</code>의 인수엔 아무런 제약이 없기 때문에 커스텀 에러 클래스는 반드시 <code>Error</code>를 상속할 필요가 없다. 
+   그렇지만 <code>Error</code>를 상속받아 커스텀 에러 클래스를 만들게 되면 <code>obj instanceof Error</code>를 사용해서 에러 객체를 식별할 수 있다는 장점이 생긴다. 
+   이런 장점 때문에 맨땅에서 커스텀 에러 객체를 만드는 것보다 <code>Error</code>를 상속받아 에러 객체를 만드는 것이 낫다.
+ 
+ ### 에러 확장하기 
+ 
+ - 먼저 <code>Error</code> 클래스 확인하기 
+ 
+ ```tsx
+ // 자바스크립트 자체 내장 에러 클래스 Error의 '슈도 코드'
+ class Error {
+   constructor(message) {
+     this.message = message;
+     this.name = "Error"; // (name은 내장 에러 클래스마다 다릅니다.)
+     this.stack = <call stack>;  // stack은 표준은 아니지만, 대다수 환경이 지원합니다.
+   }
+ }
+ ```
+ 
+ - 이제 <code>ValidationError</code>에서 <code>Error</code>를 상속받아 다음과 같이 만들 수 있다. 
+ 
+ ```tsx
+ class ValidationError extends Error {
+   constructor(message) {
+     super(message); // (1)
+     this.name = "ValidationError"; // (2)
+   }
+ }
+ ```
+
+ - 위의 예제에서 부모 생성자를 호출하고 있다는 것에 주목 -> 자바스크립트에서는 자식 생성자 안에서 super를 반드시 호출해야 한다. 
+ 
+ 
+</details>
  
  
  
