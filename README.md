@@ -2609,13 +2609,86 @@ alert(user + 500); // hint: default -> 1500
  ```tsx
  class ValidationError extends Error {
    constructor(message) {
-     super(message); // (1)
-     this.name = "ValidationError"; // (2)
+     super(message);
+     this.name = "ValidationError";
    }
  }
  ```
 
  - 위의 예제에서 부모 생성자를 호출하고 있다는 것에 주목 -> 자바스크립트에서는 자식 생성자 안에서 super를 반드시 호출해야 한다. 
+
+ ### 더 깊게 상속하기 
+ 
+ - 위의 <code>Validation Error</code> 클래스는 너무 포괄적이어서 뭔가 잘못될 확률이 있다. 꼭 필요한 프로퍼티가 누락되거나 잘못된 문자열 값이 들어가는 것처럼 형식이 잘못된 경우를 처리할 수 었다.
+ - 필수 프로퍼티가 없는 경우에 대응할 수 있도록 좀 더 구체적인 클래스를 만들어 보자 
+ 
+ ```tsx
+ class ValidationError extends Error {
+   constructor(message) {
+     super(message);
+     this.name = "ValidationError";
+   }
+ }
+
+ class PropertyRequiredError extends ValidationError {
+   constructor(property) {
+     super("No property: " + property);
+     this.name = "PropertyRequiredError";
+     this.property = property;
+  }
+ }
+ 
+ function readUser(json) {
+   let user = JSON.parse(json);
+
+   if (!user.age) {
+     throw new PropertyRequiredError("age");
+   }
+   if (!user.name) {
+     throw new PropertyRequiredError("name");
+   }
+
+   return user;
+ }
+ 
+ try {
+   let user = readUser('{ "age": 25 }');
+ } catch (err) {
+   if (err instanceof ValidationError) {
+     alert("Invalid data: " + err.message); // Invalid data: No property: name
+     alert(err.name); // PropertyRequiredError
+     alert(err.property); // name
+   } else if (err instanceof SyntaxError) {
+    alert("JSON Syntax Error: " + err.message);
+   } else {
+    throw err; // 알려지지 않은 에러는 재던지기 합니다.
+   }
+ }
+ ```
+ 
+ - 여기서 주목할 점은 <code>PropertyRequiredError</code> 생성자 안에서 <code>this.name</code>을 수동으로 할당해 주었다는 것이다. 그런데 이렇게 매번 커스텀 에러 클래스의 생성자 안에서 <code>this.name</code>를 할당하는 것은 귀찮은 작업이다.
+ - 이런 귀찮은 작업은 <b>'기본 에러'</b> 클래스를 만들고 커스텀 에러들이 이 클래스를 상속받게 함으로써 피할 수 있다. <code>this.name = this.constructor.name<code>
+ 
+ ```tsx
+ class MyError extends Error {
+   constructor(message) {
+     super(message);
+     this.name = this.constructor.name;
+   }
+ }
+
+ class ValidationError extends MyError { }
+
+ class PropertyRequiredError extends ValidationError {
+   constructor(property) {
+     super("No property: " + property);
+     this.property = property;
+   }
+ }
+
+ alert( new PropertyRequiredError("field").name );  
+ ```
+ 
  
  
 </details>
