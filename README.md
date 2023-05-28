@@ -2667,7 +2667,7 @@ alert(user + 500); // hint: default -> 1500
  ```
  
  - 여기서 주목할 점은 <code>PropertyRequiredError</code> 생성자 안에서 <code>this.name</code>을 수동으로 할당해 주었다는 것이다. 그런데 이렇게 매번 커스텀 에러 클래스의 생성자 안에서 <code>this.name</code>를 할당하는 것은 귀찮은 작업이다.
- - 이런 귀찮은 작업은 <b>'기본 에러'</b> 클래스를 만들고 커스텀 에러들이 이 클래스를 상속받게 함으로써 피할 수 있다. <code>this.name = this.constructor.name<code>
+ - 이런 귀찮은 작업은 <b>'기본 에러'</b> 클래스를 만들고 커스텀 에러들이 이 클래스를 상속받게 함으로써 피할 수 있다. <code>this.name = this.constructor.name</code>
  
  ```tsx
  class MyError extends Error {
@@ -2688,8 +2688,6 @@ alert(user + 500); // hint: default -> 1500
 
  alert( new PropertyRequiredError("field").name );  
  ```
- 
- 
  
 </details>
  
