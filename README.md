@@ -2691,5 +2691,29 @@ alert(user + 500); // hint: default -> 1500
  
 </details>
  
+
+# 주요 노드 프로퍼티
  
+<details>
+ <summary>자세히 보기</summary>
+ 
+ ### DOM 노드 클래스
+ - 모든 DOM 노드는 공통 조상으로부터 만들어지기 때문에 노드 종류는 다르지만, 모든 DOM 노드는 공통된 프로퍼티와 메서드를 지원한다.
+ - DOM 노드는 종류에 따라 대응하는 내장 클래스가 다르다.
+ - 계층 구조 꼭대기에는 <code>EventTarget</code>이 있는데, <code>Node</code>는 <code>EventTarget</code>을, 다른 DOM 노드들은 <code>Node</code> 클래스를 상속받는다. 
+ <img width="485" alt="DOM_extends_tree" src="https://github.com/in-ch/modern-javascript/assets/49556566/f82dd956-8a8d-4bca-953f-79cd811b129e">
+ 
+ - 각 클래스는 다음과 같은 특징을 지닌다.
+  - <code>EventTarget</code>: 루트에 있는 추상 클래스로, 이 클래스에 대응하는 객체는 실제로 만들어 지지 않는다. 
+    <code>EventTarget</code>가 모든 DOM 노드의 베이스에 있기때문에 DOM 노드에서 '이벤트'를 사용할 수 있다. 
+ - <code>Node</code>: 추상 클래스로, DOM 노드의 베이스 역할을 한다. <code>getter</code> 역할을 하는 <code>parentNode</code>, <code>nextSibling</code>, <code>childNodes</code> 등의 주요 트리 탐색 기능을 제공한다. <code>Node</code> 클래스의 객체는 절대 생성되지 않는다. 하지만 이 클래스를 상속받는 클래스는 여럿 있다. 텍스트 노드를 위한 <code>Text</code> 클래스와 요소 노드를 위한 <code>Element</code> 클래스, 주석 노드를 위한 Comment클래스는 <code>Node</code>클래스를 상속받는다.
+ - <code>Element</code>: DOM 요소를 위한 베이스 클래스이다. <code>nextElementSibling</code>, <code>children</code>이나 <code>getElementsByTagName</code>, <code>querySelector</code> 같이 요소 전용 탐색을 도와주는 프로퍼티나 메서드가 이를 기반한다.
+ - <code>HTMLElement</code> HTML 요소 노드의 베이스 역할을 하는 클래스이다. 
+ 
+- 이렇게 특정 노드에서 사용할 수 있는 프로퍼티와 메서드는 상속을 기반으로 결정된다. 
+ - 브라우저 콘솔에 <code>console.dir(elem)</code>를 입력하면 이런 관계를 쉽게 확인할 수 있다. 
+ 
+ 
+ 
+</details>
  
