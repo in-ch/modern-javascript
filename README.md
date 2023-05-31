@@ -2710,8 +2710,43 @@ alert(user + 500); // hint: default -> 1500
  - <code>Element</code>: DOM 요소를 위한 베이스 클래스이다. <code>nextElementSibling</code>, <code>children</code>이나 <code>getElementsByTagName</code>, <code>querySelector</code> 같이 요소 전용 탐색을 도와주는 프로퍼티나 메서드가 이를 기반한다.
  - <code>HTMLElement</code> HTML 요소 노드의 베이스 역할을 하는 클래스이다. 
  
-- 이렇게 특정 노드에서 사용할 수 있는 프로퍼티와 메서드는 상속을 기반으로 결정된다. 
+ - 이렇게 특정 노드에서 사용할 수 있는 프로퍼티와 메서드는 상속을 기반으로 결정된다. 
  - 브라우저 콘솔에 <code>console.dir(elem)</code>를 입력하면 이런 관계를 쉽게 확인할 수 있다. 
+ 
+ ### 'innerHTML+=' 사용 시 주의점
+ ```tsx
+ chatDiv.innerHTML += "<div>안녕하세요<img src='smile.gif'/> !</div>";
+ chatDiv.innerHTML += "잘 지내죠?";
+ ```
+ - 위와 같이 사용할 수 있는데 이는 추가가 아니라 내용을 덮어쓰기 때문에 주의해서 사용해야 한다. 
+ - 즉, <code>innerHTML+=</code>는 다음과 같은 일을 한다.
+  1. 기존 내용 삭제
+  2. 기존 내용과 새로운 내용을 합친 새로운 내용을 씀 
+ - 따라서 기존 내용이 <code>완전히 삭제</code> 후 밑바닥부터 다시 내용이 쓰여지기 때문에 이미지 등의 리소스 전부가 다시 로딩된다.
+ - 이외에도 부작용이 있다. 기존에 있던 텍스트를 마우스로 드래그한 상황이라면 내용을 다시 써야하기 때문에 드래그가 해제될 것이다. <code><input></code> 태그에서 사용자가 입력한 값이 사라지기도 한다. 
+ 
+ ### <code>outerHTML</code> ?? 
+ - <code>innerHTML</code>과 달리 <code>outerHTML</code>을 사용해서 HTML을 쓸땐 요소 자체가 바뀌지 않는다. 대신 <code>outerHTML</code>은 DOM 안의 요소를 교체한다. 
+ ```tsx
+ <div>Hello, world!</div>
+
+ <script>
+   let div = document.querySelector('div');
+
+   // div.outerHTML를 사용해 <p>...</p>로 교체
+   div.outerHTML = '<p>새로운 요소</p>'; // (*)
+
+   // 어! div가 그대로네 ?
+   alert(div.outerHTML); // <div>Hello, world!</div> (**)
+ </script>
+ 
+ - <code>div.outerHTML=...</code>는 다음과 같은 일을 한다.
+ 1. 문서에서 div를 삭제
+ 2. 새로운 HTML 조각인 <code><p>A new element</p></code>을 삭제 후 생긴 공간에 삽입
+ 3. div엔 여전히 기존 값이 저장되어 있고 새로운 HTML 조각은 어디에도 저장되어있지 않다.
+ - 이러한 동작 때문에 <code>outerHTML</code>을 사용할 때는 실수 할 여지가 많다. 
+ - 정리하자면 <code>innerHTML</code>은 div를 수정하지만 <code>outerHTML</code>은 div를 수정하지 않는다. 그렇기 때문에 <code>outerHTML</code>에 무언가를 쓸 때는 <code>element</code>이 수정되지 않는 점을 알아야 한다. 할당받은 HTML은 <code>element</code>이 있던 공간에 들어간다. 새롭게 만들어진 요소를 참조하려면 DOM 쿼리 메서드를 사용해야 한다. 
+ 
  
  
  
