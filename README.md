@@ -2739,7 +2739,8 @@ alert(user + 500); // hint: default -> 1500
    // 어! div가 그대로네 ?
    alert(div.outerHTML); // <div>Hello, world!</div> (**)
  </script>
- 
+ ```
+
  - <code>div.outerHTML=...</code>는 다음과 같은 일을 한다.
  1. 문서에서 div를 삭제
  2. 새로운 HTML 조각인 <code><p>A new element</p></code>을 삭제 후 생긴 공간에 삽입
