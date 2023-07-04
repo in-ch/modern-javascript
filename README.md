@@ -1,3 +1,65 @@
+[모던 JavaScript 튜토리얼](https://ko.javascript.info/)
+
+# 목차
+
+---
+
+[엄격모드](#엄격-모드)
+
+[nullish 병합 연산자](#nullish-병합-연산자)
+
+[심볼형](#심볼형)
+
+[참조에 의한 객체 복사](#참조에-의한-객체-복사)
+
+[얕은 복사와 깊은 복사 방법 정리](#얕은-복사와-깊은-복사-방법-정리)
+₩
+[가비지 컬렉션](#가비지-컬렉션)
+
+[iterable 객체](#iterable-객체)
+
+[폴리필](#폴리필)``₩
+
+[프로토타입 메서드와 __proto__가 없는 객체](#프로토타입-메서드와-__proto__가-없는-객체)
+
+[함수 바인딩](#함수-바인딩)
+
+[오래된 var](#오래된-var)
+
+[화살표 함수 다시 살펴보기](#화살표-함수-다시-살펴보기)
+
+[커링 (Currying)](#커링-currying)
+
+[객체로서의 함수와 기명 함수 표현식](#객체로서의-함수와-기명-함수-표현식)
+
+[console.log 잘 활용하기](#consolelog-잘-활용하기)
+
+[테스트 자동화와 Mocha](#테스트-자동화와-mocha)
+
+[프라미스와 에러 핸들링](#프라미스와-에러-핸들링)
+
+[마이크로태스크](#마이크로태스크)
+
+[프라미스 API](#프라미스-api)
+
+[브라우저 환경과 다양한 명세서](#브라우저-환경과-다양한-명세서)
+
+[제너레이터](#제너레이터)
+
+[async 이터레이터와 제너레이터](#async-이터레이터와-제너레이터)
+
+[Proxy와 Reflect](#proxy와-reflect)
+
+[객체를 원시형으로 변환하기](#객체를-원시형으로-변환하기)
+
+[동적으로 모듈 가져오기](#동적으로-모듈-가져오기)
+
+[롱 폴링](#롱-폴링)
+
+[커스텀 에러와 에러 확장](#커스텀-에러와-에러-확장)
+
+[주요 노드 프로퍼티](#주요-노드-프로퍼티)
+
 # 엄격 모드
 
 <details>
@@ -2474,103 +2536,6 @@ alert(user + 500); // hint: default -> 1500
  ```
  
 </details>
- 
-# 화살표 함수 다시 살펴보기 
-
-<details>
- <summary>자세히 보기</summary>
-  
- <code>화살표 함수</code>는 단순히 함수를 '짧게' 쓰기 위한 용도로만 사용되지 않는다. 화살표 함수는 몇 가지 독특하고 유용한 기능을 제공한다.
- 예를 들어 다음과 같은 함수들이 있다고 하자.
- - <code>arr.forEach(func) - func</code>는 <code>forEach</code>가 호출될 때 배열 <code>arr</code>의 요소 전체를 대상으로 실행된다.
- - <code>setTimeout(func) - func</code>는 내장 스케줄러에 의해 실행된다.
- 
- 이 함수들은 함수를 생성하고 그 함수를 어딘가에 전달하는 것이다. 그러나 어딘가에 함수를 전달하게 되면 함수의 컨텍스트를 잃을 수 있다. 이럴 때 화살표 함수를 사용하면 현재 컨텍스트를 잃지 않아 편리하다.
- 
- ### 화살표 함수에는 'this'가 없다.
- 화살표 함수 본문에서 <code>this</code>에 접근하면, 외부에서 값을 가져온다.
- 이런 특징은 객체의 메서드(<code>showList()</code>)안에서 동일 객체의 프로퍼티(<code>students</code>)를 대상으로 순회를 하는 데 사용할 수 있다. 
- 
- ```tsx
- let group = {
-  title: "1모둠",
-  students: ["보라", "호진", "지민"],
-
-  showList() {
-    this.students.forEach(
-      student => alert(this.title + ': ' + student)
-    );
-  }
- };
-
- group.showList();
- ```
- - 여기서 <code>forEach</code>가 화살표 함수이기 때문에 화살표 함수 본문에 있는 <code>this.title</code>은 화살표 함수 바깥에 있는 메서드인 <code>showList</code>가 가리키는 대상과 동일해진다. 즉 <code>this.title</code>은 <code>group.title</code>과 같다. 
- - 위 예시에서 화살표 함수 대신 '일반' 함수를 사용했다면 에러가 발생했을 거다. 
- 
- ```tsx
- let group = {
-   title: "1모둠",
-   students: ["보라", "호진", "지민"],
-
-   showList() {
-     this.students.forEach(function(student) {
-      // TypeError: Cannot read property 'title' of undefined
-      alert(this.title + ': ' + student)
-    });
-  }
- };
-
- group.showList();
- ```
- 
- - 에러는 <code>forEach</code>에 전달되는 함수의 <code>this</code>가 <code>undefined</code> 이어서 발생했한다. <code>alert 함수</code>에서 <code>undefined.title</code>에 접근하려 했기 때문에 얼럿 창엔 에러가 출력된다.
- - 그런데 화살표 함수는 <code>this</code> 자체가 없기 때문에 이런 에러가 발생하지 않는다.
-
- ### 화살표 함수는 <code>new</code>와 함께 실행할 수 없다.
- <code>this</code>가 없기 때문에 화살표 함수는 생성자 함수로 사용할 수 없다.
- 
- ### 화살표 함수 vs bind
- > 화살표 함수와 일반 함수를 <code>.bind(this)</code>를 사용해서 호출하는 것 사이에는 미묘한 차이가 있다.
- - <code>.bind(this)</code>는 함수의 <b>'한정된 버전(bound version)'</b>을 만든다.
- - 화살표 함수는 어떤 것도 <b>바인딩</b>시키지 않는다. <code>화살표 함수</code>엔 단지 <b>this</b>가 없을 뿐이다. 화살표 함수에서 <code>this</code>를 사용하면 일반 변수 서칭과 마찬가지로 this의 값을 <code>외부 렉시컬 환경</code>에서 찾는다.
- 
- ### 화살표 함수엔 'arguments'가 없다.
- > 화살표 함수는 일반 함수와는 다르게 모든 인수에 접근할 수 있게 해주는 유사 배열 객체 <code>arguments</code>를 지원하지 않는다.
- - 이런 특징은 현재 <code>this</code>값과 <code>arguments</code> 정보를 함께 실어 호출을 포워딩해 주는 데코레이터를 만들 때 유용하게 사용된다. 
- - 아래 예시에서 데코레이터 <code>defer(f, ms)</code>는 함수를 인자로 받고 이 함수를 래퍼로 감싸 반환하는데, <code>함수 f</code>는 ms 밀리초 후에 호출된다.
- 
- ```tsx
- function defer(f, ms) {
-  return function() {
-    setTimeout(() => f.apply(this, arguments), ms)
-  };
- }
-
- function sayHi(who) {
-   alert('안녕, ' + who);
- }
-
- let sayHiDeferred = defer(sayHi, 2000);
- sayHiDeferred("철수"); // 2초 후 "안녕, 철수"가 출력
- ```
- 
- - 화살표 함수를 사용하지 않고 동일한 기능을 하는 데코레이터 함수를 만들면 다음과 같다.
- ```tsx
- function defer(f, ms) {
-  return function(...args) {
-    let ctx = this;
-    setTimeout(function() {
-      return f.apply(ctx, args);
-    }, ms);
-  };
- }
- ```
- 
- - 일반 함수에선 <code>setTimeout</code>에 넘겨주는 콜백 함수에서 사용할 변수 <code>ctx</code>와 <code>args</code>를 반드시 만들어줘야 한다.
- 
- 
- </details>
  
 # 커스텀 에러와 에러 확장
  
