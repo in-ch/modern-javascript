@@ -60,6 +60,8 @@
 
 [주요 노드 프로퍼티](#주요-노드-프로퍼티)
 
+[]
+
 # 엄격 모드
 
 <details>
@@ -2718,3 +2720,53 @@ alert(user + 500); // hint: default -> 1500
  
 </details>
  
+# 화살표 함수에 대한 고촬 
+
+<details>
+ <summary>자세히 보기</summary>
+
+- 일반 함수는 호출될 때 동적으로 바인딩된 this 값을 가진다. 이것은 함수가 어떻게 호출되느냐에 따라 <code>this</code>가 달라질 수 있음을 의미한다. 예를 들어, 객체의 메서드로 정의된 일반 함수의 경우, <code>this</code>는 해당 객체를 참조한다. 
+- 화살표 함수는 자신만의 <code>this</code>를 가지고 있지 않고, 외부 스코프(최상위 함수)의 <code>this</code>를 그대로 사용한다. 이것은 화살표 함수가 생성될 때 결정되며 변경되지 않음을 의미한다. 따라서 화살표 함수 내에서 <code>this</code>를 사용하면 외부 스코프의 <code>this</code>를 사용하게 된다. 
+ 
+```typescript
+function outerFunction() {
+  const arrowFunction = () => {
+    console.log(arguments); // 화살표 함수에서 arguments를 출력
+  };
+  arrowFunction();
+}
+outerFunction(1, 2, 3);
+```
+
+- arguments 객체에서도 차이가 발생하는데 일반 함수는 <code>arguments</code>객체를 사용하여 함수에 전달된 모든 인수에 접근할 수 있다. 
+- 화살표 함수는 그 객체를 가지고 있지 않고 대신, 화살표 함수 외부 스코프에서 인수를 사용해야 한다. -> 만약 <code>arguments</code>를 호출하게 되면 외부 스코프의 <code>arguments</code>를 참조하게 된다. 
+
+- 화살표 함수는 <code>this</code>가 없기 때문에 생성자로 사용이 불가하다. 
+
+- <code>arguments</code> 객체는 JavaScript에서 함수 내부에서 사용할 수 있는 특별한 객체이다. -> 유사 배열 객체인데, 이는 배열과 유사한 인덱스로 인수에 접근할 수 있지만, 배열의 메서드(<code>pop</code>, <code>push</code>, <code>forEach</code>)를 직접 사용할 수는 없다.
+
+- <code>arguments[인덱스]</code>를 사용하여 특정 인덱스에 해당하는 인수에 접근할 수 있다. 
+
+- 만약 react 라이프 사이클에서 arrow function을 사용하게 되면 해당 함수는 자신만의 <code>this</code>를 가지고 있지 않기 때문에 외부 스코프의 <code>this</code>를 상속받게 된다 -> 문제 발생 !!! 따라서 함수 선언문을 통해 콜백 함수 내에서 <code>this</code>가 제대로 컴포넌트 인스턴스를 참조할 수 있도록 해야 한다. 
+
+- 화살표 함수로 객체 메소드를 사용할 때 발생 가능한 오류 
+
+```typescript
+const obj = {
+  value: 42,
+  getValue: () => {
+    console.log(this.value); // undefined
+  },
+};
+```
+
+- DOM 이벤트 핸들러로 사용할 때 발생 가능한 예상치 못한 오류 (****)
+
+```typescript
+const button = document.getElementById("myButton");
+button.addEventListener("click", () => {
+  console.log(this); // window 객체를 가리킴, 예상과 다름
+});
+```
+
+</details>
