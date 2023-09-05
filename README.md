@@ -1901,173 +1901,6 @@ if (confirm("위키피디아 페이지로 가시겠습니까?")) {
 ```
 </details>
 
-# 제너레이터
-
-<details>
- <summary>자세히 보기</summary>
- 
-> 일반 함수는 하나의 값(혹은 0개의 값)만을 반환한다. 하지만 <code>제너레이터(generator)</code>를 사용하면 여러 개의 값을 필요에 따라 하나씩 반환(yield)할 수 있으며, 제너레이터와 이터러블 객체를 함께 사용하면 손쉽게 데이터 스트림을 만들 수 있다.
-
-### 제너레이터 함수
-
-```tsx
-function* generateSequence() {
-  yield 1;
-  yield 2;
-  return 3;
-}
-```
-> 제너레이터 함수는 일반 함수와 동작 방식이 다르다. 제너레이터 함수를 호출하면 코드가 실행되지 않고, 대신 실행을 처리하는 특별 객체, <code>제너레이터 객체</code>가 반환된다.
-> <code>next()</code>는 제너레이터의 주요 메서드이다. <code>next()</code>를 호출하면 가장 가까운 <code>yield <value></code>문을 만날 때까지 실행이 지속된다. (value를 생략할 수도 있는데, 이 경우엔 undefined이 됨.). 이후, <code>yield <value></code>문을 만나면 실행이 멈추고 산출하고자 하는 값인 <code>value</code>가 바깥 코드에 반환된다.
-
-- next()는 항상 아래 두 프로퍼티를 가진 객체를 반환
-
-1. <code>value</code>: 산출 값
-2. <code>done</code>: 함수 코드 실행이 끝났으면 true, 아니라면 false
-
-ex) 제너레이터를 이용해 첫 번째 산출 값을 받는 예시
-```tsx
-function* generateSequence() {
-  yield 1;
-  yield 2;
-  return 3;
-}
-
-let generator = generateSequence();
-
-let one = generator.next();
-
-alert(JSON.stringify(one));
-```
-
-- 여기서 <code>generator.next()</code>를 다시 호출해보자.
-
-```tsx
-let two = generator.next();
-
-alert(JSON.stringify(two)); // {value: 2, done: false}
-```
-
-- 마지막으로 <code>generator.next()</code>를 다시 호출하면 <code>return</code>에 다다르고 함수가 종료된다.
-```tsx
-let three = generator.next();
-
-alert(JSON.stringify(three)); // {value: 3, done: true}
-```
-
-### <code>function* f{...} vs function *f(...)</code>
-
-> 둘 중에 어느 것이 맞을까??
-  <code>"*"</code>는 종류를 나타내는 것이지 이름을 나타내는 것이 아니므로 <code>"*"</code>는 <code>function</code>에 붙여야 한다. 
-  
-### 제너레이터 컴포지션
-
-> <code>제너레이터 컴포지션</code>은 제너레이터 안에 제너레이터를 임베딩 할 수 있는 기능이다. <code>yield*</code>를 사용하면 된다. 
-
-ex) 예시
-```tsx
-function* generateSequence(start, end) {
-  for (let i = start; i <= end; i++) yield i;
-}
-
-function* generatePasswordCodes() {
-
-  // 0..9
-  yield* generateSequence(48, 57);
-
-  // A..Z
-  yield* generateSequence(65, 90);
-
-  // a..z
-  yield* generateSequence(97, 122);
-
-}
-
-let str = '';
-
-for(let code of generatePasswordCodes()) {
-  str += String.fromCharCode(code);
-}
-
-alert(str);
-```
-### <code>yield</code>를 사용해 제네레이터 안, 밖으로 정보 교환하기 
-
-- <code>yield</code>는 결과를 바깥으로 전달할 뿐만 아니라 값을 제너레이터 안으로 전달하는 것도 가능하다.
-- 값을 안, 밖으로 전달하려면 <code>generator.next(arg)</code>를 호출해야 한다. 이때 인수 <code>arg</code>는 <code>yield</code>의 결과가 된다.
-- 일반 함수와 다르게 제너레이터의 외부 호출 코드는 <code>next/yield</code>를 이용해 결과를 전달 및 교환한다. 
-
-예시)
-```tsx
-function* gen() {
-  // 질문을 제너레이터 밖 코드에 던지고 답을 기다립니다.
-  let result = yield "2 + 2 = ?"; // (*)
-
-  alert(result);
-}
-
-let generator = gen();
-
-let question = generator.next().value; // <-- yield는 value를 반환
-
-generator.next(4); // --> 결과를 제너레이터 안으로 전달
-```
-
-1. <code>generator.next()</code>를 처음 호출할 땐 항상 인수가 없어야 한다. 인수가 넘어오더라도 무시되어야 한다. <code>generator.next()</code>를 호출하면 실행이 시작되고 첫 번째 <code>yield "2+2=?"</code>의 결과가 반환된다. 이 시점에는 제너레이터가 (*)로 표시한 줄에서 실행을 잠시 멈춘다.
-2. 그 후 <code>yield</code>의 결과가 제너레이터를 호출하는 <code>question</code>에 할당된다.
-3. 마지막에 <code>generator.next(4)</code>에서 제너레이터가 다시 시작되고 4는 <code>result</code>에 할당된다. 
-
-예시 2) 
-```tsx
-function* gen() {
-  let ask1 = yield "2 + 2 = ?";
-
-  alert(ask1); // 4
-
-  let ask2 = yield "3 * 3 = ?"
-
-  alert(ask2); // 9
-}
-
-let generator = gen();
-
-alert( generator.next().value ); // "2 + 2 = ?"
-
-alert( generator.next(4).value ); // "3 * 3 = ?"
-
-alert( generator.next(9).done ); // true
-```
-
-1. 제너레이터 객체가 만들어지고 첫 번째 .next()가 호출되면, 실행이 시작되고 첫 번째 yield에 다다름,
-2. 산출 값은 바깥 코드로 반환
-3. 두 번째 <code>.next(4)</code>는 첫 번째 <code>yield</code>의 결과가 될 4를 제너레이터 안으로 전달, 그리고 다시 실행
-4. 실행 흐름이 두 번째 <code>yield</code>에 다다르고, 산출 값("3 * 3 = ?")이 제너레이터 호출 결과가 됨.
-5. 세 번째 next(9)는 두 번째 yield의 결과가 될 9를 제너레이터 안으로 전달, 그리고 실행이 이어지는데, <code>done: true</code>이므로 제너레이터 함수 종료 
-
-### generator.throw
-
-> <code>제너레이터</code>를 사용할 때 외부 코드가 에러를 만들거나 던질 수도 있다.
-  에러를 <code>yield</code> 안으로 전달하려면 <code>generator.throw(err)</code>를 호출해야 한다. <code>generator.throw(err)</code>를 호출하게 되면 <code>err</code>는 <code>yield</code>가 있는 줄로 던져진다.
-
-예시)
-```tsx
-function* generate() {
-  let result = yield "2 + 2 = ?"; // Error in this line
-}
-
-let generator = generate();
-
-let question = generator.next().value;
-
-try {
-  generator.throw(new Error("데이터베이스에서 답을 찾지 못했습니다."));
-} catch(e) {
-  alert(e); // 에러 출력
-}
-```
-
-</details>
-
 # async 이터레이터와 제너레이터
 
 <details>
@@ -2791,5 +2624,82 @@ button.addEventListener("click", () => {
     font-size: 18px; /* 루트 요소의 글꼴 크기를 18픽셀로 설정 */
   }
   ```
+
+</details>
+
+
+# 제너레이터 
+
+<details>
+ <summary>자세히 보기</summary>
+
+제레터는 이너레이터를 어떻게 하면 쉽게 구현할지를 염두에 두며 추가되었다.
+
+일반 함수는 하나의 값만 리턴할 수 있다. 하지만 제너레이터를 사용하게 되면 여러 개의 값을 필요에 따라 리턴할 수 있다.
+<code>function</code> 뒤에 <code>*</code>를 붙여서 사용 가능하다. 함수 안에 <code>yield</code>를 통해서 여러 개의 값을 필요에 따라 하나씩 리턴할 수 있다.
+<code>next()</code> 메소드를 통해서 실행 순서를 제어할 수 있다. (가장 가까운 <code>yield <value></code>문을 만날 때까지 실행) 
+<code>next()</code> 는 항상 두 프로퍼티를 가진 객체를 반환한다.
+  - done: true 혹은 false
+  - value: 산출값
+일반적으로 값을 할당하게 되면 (let generator = generateSequence())코드가 실행되지 않고 실행을 처리하는 제너레이터 객체를 리턴한다. 
+
+### function* f(…)가 맞나요 아니면 function *f(…)가 맞나요?
+다 맞습니다.
+그런데 `*`는 제너레이터 `함수`를 나타내므로 대개는 첫 번째 문법이 선호됩니다. `*`는 종류를 나타내는 것이지 이름을 나타내는 것이 아니기 때문입니다. 그러므로 `*`는 `function`에 붙이도록 합시다.
+
+### next() 메서드를 보면서 짐작하셨듯이, 제너레이터는 이터러블 입니다.
+따라서 <code>for .. of</code> 반복문을 사용해 값을 얻을 수 있다. 
+
+```javascript
+function* generateSequence() {
+  yield 1;
+  yield 2;
+  return 3;
+}
+
+let generator = generateSequence();
+
+for(let value of generator) {
+  alert(value); // 1, 2가 출력됨
+}
+```
+그런데 주의할 점은 여기서 value를 리턴하게 했는데 for..of 이터레이션이 done: true일 때 마지막 value를 무시하기 때문에 1,2만 출력된다. 
+
+만약에 다 리턴하고 싶다면 yield를 리턴해야 한다.
+
+보통 다음과 같이 하면 된다.
+
+```javascript
+function* fetchSequentially(urls) {
+  for (const url of urls) {
+    const response = yield fetch(url);
+    const data = yield response.json();
+    console.log(data);
+  }
+}
+
+const urls = ['url1', 'url2', 'url3'];
+const generator = fetchSequentially(urls);
+
+function runGenerator() {
+  const { value, done } = generator.next();
+  if (!done) {
+    value.then((result) => {
+      const { value, done } = generator.next(result);
+      if (!done) {
+        value.then((result) => {
+          runGenerator(); // 재귀 호출을 통해 계속 실행
+        });
+      }
+    });
+  }
+}
+
+runGenerator();
+```
+
+여기서 return 값을 따로 명시해 주지 않았으므로 마지막에는 done:true, value: undefined가 된다. 
+
+여기서 보듯이 generator는 api url를 여러번 호출하게 될 때 유용하게 쓰일 수 있다.
 
 </details>
