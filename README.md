@@ -58,7 +58,7 @@
 
 [주요 노드 프로퍼티](#주요-노드-프로퍼티)
 
-[]
+[화살표 함수에 this 객체가 없으므로써 발생할 수 있는 예상 오류는?](#화살표-함수에-this-객체가-없으므로써-발생할-수-있는-예상-오류는)
 
 # 엄격 모드
 
@@ -2701,5 +2701,54 @@ runGenerator();
 여기서 return 값을 따로 명시해 주지 않았으므로 마지막에는 done:true, value: undefined가 된다. 
 
 여기서 보듯이 generator는 api url를 여러번 호출하게 될 때 유용하게 쓰일 수 있다.
+
+</details>
+
+
+# 화살표 함수에 this 객체가 없으므로써 발생할 수 있는 예상 오류는? 
+
+<details>
+ <summary>자세히 보기</summary>
+
+1. DOM 이벤트 핸들러로 사용 시 
+    
+    DOM 요소의 이벤트 핸들러로 화살표 함수를 사용하면 ‘this’가 예상과 다른 값을 가질 수 있다. 
+    
+    일반적인 함수로 정의한 경우 this는 이벤트가 발생한 DOM 요소를 가리킨다. 하지만 화살표 함수를 사용하면 주변 스코프의 this를 가져오므로 예상과 다른 결과가 나타날 수 있다.
+    
+    ```jsx
+    const button = document.getElementById("myButton");
+    button.addEventListener("click", () => {
+      console.log(this); // window 객체를 가리킴, 예상과 다름
+    });
+    ```
+    
+2. 생성자 함수로 사용시
+    
+    화살표 함수는 생성자 함수로 사용될 수 없다. 생성자 함수는 **`새로운 객체를 생성하고 this를 해당 객체로 바인딩하는 역할`**을 한다. 화살표 함수에서는 this를 자체적으로 가지지 않기 때문에 이러한 용도로 사용할 수 없다.
+    
+    ```jsx
+    const Person = (name) => {
+      this.name = name; // 에러 발생
+    };
+    const person = new Person("John");
+    ```
+    
+3. 객체 메소드로 사용시 오류 발생 
+    
+    화살표 함수를 객체의 메소드로 사용할 때, 메소드 내에서 **`this`**는 해당 객체가 아닌 주변 스코프의 **`this`**를 가르킨다. 이로 인해 메소드 내에서 객체의 속성에 접근하거나 수정할 때 문제가 발생한다.
+    
+    ```jsx
+    const obj = {
+      value: 42,
+      getValue: () => {
+        console.log(this.value); // undefined
+      },
+    };
+    ```
+
+### 그럼에도 왜 화살표 함수가 react hooks에서 자주 쓰일까?
+
+화살표 함수는 코드를 좀 더 간결하게 만들어준다. 하지만 간결해진 대신 컴포넌트에서 라이프사이클을 활용하지 못한다는 단점이 있다. 이런 종류의 컴포넌트는 **stateless** ****함수형 컴포넌트(functional component)**라 불린다. → 중괄호도 생략가능해서 간결하다.
 
 </details>
